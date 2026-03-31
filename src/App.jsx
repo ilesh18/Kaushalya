@@ -264,9 +264,12 @@ const AnimatedRoutes = () => {
   );
 };
 
-function App() {
+const AppLayout = () => {
+  const location = useLocation();
+  const isChatPage = location.pathname === '/chat';
+
   return (
-    <BrowserRouter>
+    <>
       {/* 1. Skip to main content link must be first in body/app */}
       <a href="#main-content" className="skip-link">Skip to main content</a>
 
@@ -277,8 +280,16 @@ function App() {
           <AnimatedRoutes />
         </main>
 
-        <Footer />
+        {!isChatPage && <Footer />}
       </div>
+    </>
+  );
+};
+
+function App() {
+  return (
+    <BrowserRouter>
+      <AppLayout />
     </BrowserRouter>
   );
 }
