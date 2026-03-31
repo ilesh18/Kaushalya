@@ -35,10 +35,18 @@ export default function JobListings() {
   return (
     <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '40px 24px', display: 'flex', gap: '32px' }}>
       
+      {/* Skip section link for switch users */}
+      <a href="#job-results" className="skip-section-link">Skip to job results</a>
+      
       {/* Mobile Filter Button */}
       <div className="mobile-only" style={{ position: 'fixed', bottom: '24px', right: '24px', zIndex: 50 }}>
-        <AccessibleButton onClick={() => setMobileFilterOpen(!mobileFilterOpen)} style={{ borderRadius: '50%', width: '60px', height: '60px', padding: 0 }}>
-          <Filter size={24} />
+        <AccessibleButton 
+          onClick={() => setMobileFilterOpen(!mobileFilterOpen)} 
+          style={{ borderRadius: '50%', width: '60px', height: '60px', padding: 0 }}
+          aria-label="Open job search filters"
+          aria-expanded={mobileFilterOpen}
+        >
+          <Filter size={24} aria-hidden="true" />
         </AccessibleButton>
       </div>
 
@@ -95,14 +103,14 @@ export default function JobListings() {
       </aside>
 
       {/* Main Content */}
-      <main style={{ flex: 1, minWidth: 0 }} id="focus-top">
+      <main style={{ flex: 1, minWidth: 0 }} id="job-results">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '24px' }}>
           <h1 aria-live="polite" style={{ fontSize: '2rem', margin: 0 }}>
             {MOCK_JOBS.length} accessible jobs found
           </h1>
           <div className="desktop-only">
             <label htmlFor="sortJobs" className="sr-only">Sort Jobs</label>
-            <select id="sortJobs" style={{ width: 'auto' }}>
+            <select id="sortJobs" style={{ width: 'auto', minHeight: '44px' }}>
               <option>Sort by: Match Score</option>
               <option>Sort by: Newest</option>
               <option>Sort by: Salary (High-Low)</option>
@@ -155,14 +163,15 @@ export default function JobListings() {
                     <AccessibleButton 
                       variant={isSaved ? "primary" : "outline"} 
                       onClick={() => toggleSave(job.id)}
-                      aria-label={`${isSaved ? 'Unsave' : 'Save'} ${job.title} at ${job.company}`}
+                      aria-label={`${isSaved ? 'Remove from' : 'Add to'} saved jobs: ${job.title} at ${job.company}`}
                       aria-pressed={isSaved}
                       style={{ padding: '0 16px' }}
                     >
-                      <Bookmark size={20} fill={isSaved ? "white" : "none"} />
+                      <Bookmark size={20} fill={isSaved ? "white" : "none"} aria-hidden="true" />
+                      <span className="sr-only">{isSaved ? 'Saved' : 'Save job'}</span>
                     </AccessibleButton>
-                    <Link to={`/jobs/${job.id}`} tabIndex="-1" style={{ textDecoration: 'none' }}>
-                      <AccessibleButton aria-label={`Apply for ${job.title} at ${job.company}`}>
+                    <Link to={`/jobs/${job.id}`} style={{ textDecoration: 'none' }}>
+                      <AccessibleButton aria-label={`View details and apply for ${job.title} at ${job.company}`}>
                         View & Apply
                       </AccessibleButton>
                     </Link>

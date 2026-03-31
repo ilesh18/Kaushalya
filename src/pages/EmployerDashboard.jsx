@@ -101,15 +101,15 @@ export default function EmployerDashboard() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '32px', marginBottom: '40px' }}>
               <div>
                 <label htmlFor="jobTitle">Job Title</label>
-                <input id="jobTitle" type="text" required />
+                <input id="jobTitle" type="text" required autoComplete="organization-title" />
               </div>
               <div>
                 <label htmlFor="company">Company Name</label>
-                <input id="company" type="text" value="TechCorp India" readOnly disabled style={{ opacity: 0.7 }} />
+                <input id="company" type="text" value="TechCorp India" readOnly disabled style={{ opacity: 0.7 }} autoComplete="organization" />
               </div>
               <div>
                 <label htmlFor="location">Location</label>
-                <input id="location" type="text" required />
+                <input id="location" type="text" required autoComplete="address-level2" />
               </div>
               
               <fieldset style={{ gridColumn: '1 / -1' }}>

@@ -65,6 +65,8 @@ export default function ProfileBuilder() {
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         style={{ padding: '80px 24px', textAlign: 'center', maxWidth: '600px', margin: '0 auto', position: 'relative', zIndex: 10 }}
+        role="status"
+        aria-live="polite"
       >
         <motion.div 
           initial={{ rotate: -180, opacity: 0 }}
@@ -76,6 +78,7 @@ export default function ProfileBuilder() {
             margin: '0 auto 32px',
             boxShadow: '0 10px 30px rgba(5, 150, 105, 0.3)'
           }}
+          aria-hidden="true"
         >
           <Check size={50} strokeWidth={3} />
         </motion.div>
@@ -83,9 +86,12 @@ export default function ProfileBuilder() {
         <p style={{ color: 'var(--text-muted)', fontSize: '1.25rem', marginBottom: '40px', lineHeight: '1.6' }}>
           We've found <strong style={{ color: 'var(--accent-purple)' }}>47 accessible roles</strong> that perfectly match your skills and accommodations.
         </p>
-        <Link to="/jobs" style={{ textDecoration: 'none' }} tabIndex="-1">
-          <AccessibleButton style={{ minHeight: '60px', fontSize: '1.25rem', padding: '0 40px', borderRadius: '16px' }}>
-            Browse Matching Jobs <ChevronRight size={24} />
+        <Link to="/jobs" style={{ textDecoration: 'none' }}>
+          <AccessibleButton 
+            style={{ minHeight: '60px', fontSize: '1.25rem', padding: '0 40px', borderRadius: '16px' }}
+            aria-label="Browse 47 matching accessible job listings"
+          >
+            Browse Matching Jobs <ChevronRight size={24} aria-hidden="true" />
           </AccessibleButton>
         </Link>
       </motion.div>
@@ -167,19 +173,19 @@ export default function ProfileBuilder() {
                 <div style={{ display: 'grid', gap: '24px', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>
                   <div style={{ gridColumn: '1 / -1' }}>
                     <label htmlFor="fullName">Full Name</label>
-                    <input id="fullName" type="text" required placeholder="Priya Sharma" />
+                    <input id="fullName" type="text" required placeholder="Priya Sharma" autoComplete="name" />
                   </div>
                   <div>
                     <label htmlFor="email">Email Address</label>
-                    <input id="email" type="email" required placeholder="priya@example.com" />
+                    <input id="email" type="email" required placeholder="priya@example.com" autoComplete="email" />
                   </div>
                   <div>
                     <label htmlFor="phone">Phone Number</label>
-                    <input id="phone" type="tel" placeholder="+91 98765 43210" />
+                    <input id="phone" type="tel" placeholder="+91 98765 43210" autoComplete="tel" />
                   </div>
                   <div>
                     <label htmlFor="state">State</label>
-                    <select id="state" required>
+                    <select id="state" required autoComplete="address-level1">
                       <option value="">Select State...</option>
                       <option value="MH">Maharashtra</option>
                       <option value="KA">Karnataka</option>
@@ -188,7 +194,7 @@ export default function ProfileBuilder() {
                   </div>
                   <div>
                     <label htmlFor="city">City</label>
-                    <input id="city" type="text" required placeholder="Bangalore" />
+                    <input id="city" type="text" required placeholder="Bangalore" autoComplete="address-level2" />
                   </div>
                   <div style={{ gridColumn: '1 / -1', marginTop: '16px' }}>
                     <label htmlFor="profilePhoto">Profile Photo (Optional)</label>
