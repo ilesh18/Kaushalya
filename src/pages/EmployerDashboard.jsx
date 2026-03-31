@@ -1,22 +1,27 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Briefcase, Users, UserPlus, CheckCircle } from 'lucide-react';
+import { Briefcase, Users, UserPlus, CheckCircle, Ear, Eye, MessageSquare } from 'lucide-react';
 import { AccessibleButton } from '../App';
 
 export default function EmployerDashboard() {
   const [desc, setDesc] = useState('');
   
-  // Accessibility Checklist States
+  // Accessibility Checklist States - Extended for Deaf/HoH support
   const [checks, setChecks] = useState({
+    // Physical
     p1: false, p2: false, p3: false, p4: false,
+    // Digital
     d1: false, d2: false, d3: false, d4: false,
+    // Support & Flexibility
     s1: false, s2: false, s3: false, s4: false,
+    // NEW: Deaf/HoH Specific
+    h1: false, h2: false, h3: false, h4: false, h5: false, h6: false,
   });
 
   const toggleCheck = (id) => setChecks({...checks, [id]: !checks[id]});
   
   const score = Object.values(checks).filter(Boolean).length;
-  const maxScore = 12;
+  const maxScore = 18; // Updated for new checklist items
   const scorePct = (score / maxScore) * 100;
   
   let scoreColor = 'var(--danger)';
@@ -199,6 +204,32 @@ export default function EmployerDashboard() {
                     <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', margin: 0 }}><input type="checkbox" checked={checks.s4} onChange={() => toggleCheck('s4')} /> Dedicated accessibility coordinator</label>
                   </div>
                 </fieldset>
+
+                {/* NEW: Deaf/Hard of Hearing Specific Accessibility */}
+                <fieldset className="glass" style={{ padding: '24px', borderRadius: '16px', background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(139, 92, 246, 0.05))', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+                  <legend style={{ fontSize: '1.25rem', marginBottom: '24px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span role="img" aria-label="Deaf/HoH">🤟</span> Deaf/HoH Accessibility
+                  </legend>
+                  <p style={{ color: 'var(--text-muted)', marginBottom: '20px', fontSize: '0.9rem' }}>
+                    These features are essential for Deaf and Hard of Hearing employees. Mark all that your workplace provides.
+                  </p>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', margin: 0 }}>
+                      <input type="checkbox" checked={checks.h1} onChange={() => toggleCheck('h1')} /> 
+                      <span>Induction/hearing loop system available</span>
+                      <span className="induction-loop-badge" style={{ marginLeft: 'auto', fontSize: '0.7rem', padding: '2px 8px' }}>T-coil compatible</span>
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', margin: 0 }}>
+                      <input type="checkbox" checked={checks.h2} onChange={() => toggleCheck('h2')} /> 
+                      <span>Visual fire alarms/alerts installed</span>
+                      <span className="visual-alarm-badge" style={{ marginLeft: 'auto', fontSize: '0.7rem', padding: '2px 8px' }}>Safety</span>
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', margin: 0 }}><input type="checkbox" checked={checks.h3} onChange={() => toggleCheck('h3')} /> BSL/ASL/ISL interpreters for meetings</label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', margin: 0 }}><input type="checkbox" checked={checks.h4} onChange={() => toggleCheck('h4')} /> Real-time captioning (CART) available</label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', margin: 0 }}><input type="checkbox" checked={checks.h5} onChange={() => toggleCheck('h5')} /> Video relay service (VRS) for calls</label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', margin: 0 }}><input type="checkbox" checked={checks.h6} onChange={() => toggleCheck('h6')} /> Text-based alternatives to phone calls</label>
+                  </div>
+                </fieldset>
               </div>
 
               <div style={{ marginTop: '48px', padding: '24px', background: 'var(--bg-primary)', borderRadius: '16px', border: `2px solid ${scoreColor}` }}>
@@ -206,7 +237,7 @@ export default function EmployerDashboard() {
                    <span>Accessibility Score: {score}/{maxScore} checks completed</span>
                    <span>{scorePct.toFixed(0)}%</span>
                  </div>
-                 <div role="progressbar" aria-valuenow={score} aria-valuemin="0" aria-valuemax={maxScore} style={{ height: '16px', background: 'var(--border)', borderRadius: '8px', overflow: 'hidden' }}>
+                 <div role="progressbar" aria-valuenow={score} aria-valuemin="0" aria-valuemax={maxScore} aria-label={`Accessibility score: ${score} out of ${maxScore}, ${scorePct.toFixed(0)} percent`} style={{ height: '16px', background: 'var(--border)', borderRadius: '8px', overflow: 'hidden' }}>
                     <motion.div 
                       key={score}
                       initial={{ width: 0 }}
@@ -215,6 +246,14 @@ export default function EmployerDashboard() {
                       style={{ height: '100%', background: scoreColor }}
                     />
                  </div>
+                 {/* Deaf/HoH specific score indicator */}
+                 {(checks.h1 || checks.h2 || checks.h3 || checks.h4 || checks.h5 || checks.h6) && (
+                   <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                     <span className="deaf-friendly-badge">
+                       <span role="img" aria-hidden="true">🤟</span> Deaf/HoH Friendly Workplace
+                     </span>
+                   </div>
+                 )}
               </div>
             </div>
 

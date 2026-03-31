@@ -227,7 +227,7 @@ export default function ProfileBuilder() {
                 <fieldset style={{ marginBottom: '40px' }}>
                   <legend style={{ marginBottom: '16px', fontSize: '1.1rem' }}>Assistive Technology You Use</legend>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '16px' }}>
-                    {['Screen reader (JAWS)', 'Screen reader (NVDA)', 'Screen reader (VoiceOver)', 'Braille display', 'Switch access', 'Voice control', 'Magnification software', 'None currently'].map((type) => (
+                    {['Screen reader (JAWS)', 'Screen reader (NVDA)', 'Screen reader (VoiceOver)', 'Braille display', 'Switch access', 'Voice control', 'Magnification software', 'Hearing aids', 'Cochlear implants', 'FM/loop system', 'Video relay service (VRS)', 'None currently'].map((type) => (
                       <label key={type} className="glass" style={{ display: 'flex', alignItems: 'center', gap: '12px', fontWeight: '500', margin: 0, padding: '12px 16px', borderRadius: '12px', background: 'rgba(255,255,255,0.4)', cursor: 'pointer' }}>
                         <input type="checkbox" name="assistiveTech" value={type} />
                         {type}
@@ -236,10 +236,73 @@ export default function ProfileBuilder() {
                   </div>
                 </fieldset>
 
+                {/* NEW: Deaf/HoH Communication Preferences Section */}
+                <div className="communication-prefs-section" style={{ marginBottom: '40px' }}>
+                  <h3 style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px', fontSize: '1.25rem' }}>
+                    <span role="img" aria-label="Sign language">🤟</span>
+                    Deaf/HoH Communication Preferences
+                  </h3>
+                  <p style={{ color: 'var(--text-muted)', marginBottom: '24px', fontSize: '0.95rem' }}>
+                    Help employers understand your preferred communication methods. This information is optional and helps match you with inclusive workplaces.
+                  </p>
+                  
+                  <fieldset style={{ marginBottom: '24px' }}>
+                    <legend style={{ marginBottom: '12px', fontSize: '1rem', fontWeight: '600' }}>Primary Communication Method</legend>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+                      {['Spoken language', 'British Sign Language (BSL)', 'American Sign Language (ASL)', 'Indian Sign Language (ISL)', 'Lip reading', 'Written/Text only', 'Combination'].map((method) => (
+                        <label key={method} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', background: 'rgba(255,255,255,0.6)', borderRadius: '20px', cursor: 'pointer', fontWeight: '500' }}>
+                          <input type="radio" name="primaryComm" value={method} />
+                          {method}
+                        </label>
+                      ))}
+                    </div>
+                  </fieldset>
+
+                  <fieldset style={{ marginBottom: '24px' }}>
+                    <legend style={{ marginBottom: '12px', fontSize: '1rem', fontWeight: '600' }}>Interview Preferences</legend>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '12px' }}>
+                      {[
+                        'Video call with live captions',
+                        'Sign language interpreter provided',
+                        'Text-based/chat interview',
+                        'Written questions in advance',
+                        'Extra time for communication',
+                        'CART (real-time captioning)',
+                        'In-person with loop system',
+                        'Asynchronous video responses'
+                      ].map((pref) => (
+                        <label key={pref} className="glass" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 16px', borderRadius: '12px', cursor: 'pointer', fontWeight: '500' }}>
+                          <input type="checkbox" name="interviewPrefs" value={pref} />
+                          {pref}
+                        </label>
+                      ))}
+                    </div>
+                  </fieldset>
+
+                  <fieldset>
+                    <legend style={{ marginBottom: '12px', fontSize: '1rem', fontWeight: '600' }}>Contact Method Preferences</legend>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+                      {[
+                        { label: 'Email', icon: '✉️' },
+                        { label: 'SMS/Text', icon: '💬' },
+                        { label: 'Video call', icon: '📹' },
+                        { label: 'Text Relay (NGT/Relay UK)', icon: '📞' },
+                        { label: 'WhatsApp', icon: '📱' },
+                        { label: 'No phone calls', icon: '🚫' }
+                      ].map(({ label, icon }) => (
+                        <label key={label} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', background: 'rgba(255,255,255,0.6)', borderRadius: '20px', cursor: 'pointer', fontWeight: '500' }}>
+                          <input type="checkbox" name="contactPrefs" value={label} />
+                          <span role="img" aria-hidden="true">{icon}</span> {label}
+                        </label>
+                      ))}
+                    </div>
+                  </fieldset>
+                </div>
+
                 <fieldset>
                   <legend style={{ marginBottom: '16px', fontSize: '1.1rem' }}>Workplace Accommodations Needed</legend>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '16px' }}>
-                    {['Remote work', 'Flexible hours', 'Accessible office', 'Sign language interpreter', 'Large print materials', 'Text-to-speech software', 'Ergonomic equipment', 'Quiet workspace'].map((acc) => (
+                    {['Remote work', 'Flexible hours', 'Accessible office', 'Sign language interpreter', 'Large print materials', 'Text-to-speech software', 'Ergonomic equipment', 'Quiet workspace', 'Visual fire alarms', 'Induction/hearing loop', 'Video relay service', 'Real-time captioning (CART)', 'Deaf awareness trained team'].map((acc) => (
                       <label key={acc} className="glass" style={{ display: 'flex', alignItems: 'center', gap: '12px', fontWeight: '500', margin: 0, padding: '12px 16px', borderRadius: '12px', background: 'rgba(255,255,255,0.4)', cursor: 'pointer' }}>
                         <input type="checkbox" name="accommodations" value={acc} />
                         {acc}

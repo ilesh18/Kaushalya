@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, createContext, useContext } from 'react';
 import { BrowserRouter, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, MessageCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -8,8 +8,33 @@ import JobListings from './pages/JobListings';
 import JobDetail from './pages/JobDetail';
 import EmployerDashboard from './pages/EmployerDashboard';
 import ChatbotPage from './pages/ChatbotPage';
+import ScreenReader from './ScreenReader';
 import faviconImg from './public/favicon.png';
 import './App.css';
+
+/**
+ * Visual Alert System for Deaf/HoH Users
+ * Provides visual feedback for events that would normally only have audio alerts
+ */
+export const announceToScreenReader = (message) => {
+  const announcer = document.getElementById('a11y-announcer');
+  if (announcer) {
+    announcer.textContent = '';
+    // Small delay to ensure the change is detected
+    setTimeout(() => {
+      announcer.textContent = message;
+    }, 50);
+  }
+};
+
+export const triggerVisualAlert = (element) => {
+  if (element) {
+    element.classList.add('visual-alert');
+    setTimeout(() => {
+      element.classList.remove('visual-alert');
+    }, 3000);
+  }
+};
 
 // Base accessible button component used throughout
 export const AccessibleButton = ({ children, onClick, className = '', variant = 'primary', style, ...props }) => {
@@ -183,20 +208,24 @@ const Footer = () => (
       <div style={{ maxWidth: '400px' }}>
         <strong style={{ fontSize: '1.5rem', fontFamily: "'Outfit', sans-serif" }}>AbilityConnect</strong>
         <p style={{ color: 'var(--text-muted)', marginTop: '12px', fontSize: '1.1rem' }}>We are an inclusive platform dedicated to removing barriers and matching talent to truly accessible roles.</p>
-        <div style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '8px',
-          padding: '6px 12px',
-          background: 'rgba(5, 150, 105, 0.1)',
-          border: '1px solid rgba(5, 150, 105, 0.2)',
-          color: 'var(--success)',
-          borderRadius: '20px',
-          fontSize: '0.875rem',
-          fontWeight: '600',
-          marginTop: '16px'
-        }}>
-          Accessibility: WCAG 2.1 AA Compliant
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '16px' }}>
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '6px 12px',
+            background: 'rgba(5, 150, 105, 0.1)',
+            border: '1px solid rgba(5, 150, 105, 0.2)',
+            color: 'var(--success)',
+            borderRadius: '20px',
+            fontSize: '0.875rem',
+            fontWeight: '600'
+          }}>
+            Accessibility: WCAG 2.1 AA
+          </div>
+          <div className="deaf-friendly-badge" style={{ fontSize: '0.875rem' }}>
+            <span role="img" aria-hidden="true">🤟</span> Deaf/HoH Friendly
+          </div>
         </div>
       </div>
       <div>
@@ -207,13 +236,69 @@ const Footer = () => (
           <Link to="/accessibility">Accessibility Statement</Link>
         </nav>
       </div>
+      
+      {/* NEW: Contact Options for Deaf/HoH Users */}
       <div>
-        <nav aria-label="Connect" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <nav aria-label="Contact Options" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <strong style={{ color: 'var(--text-primary)', marginBottom: '8px', fontSize: '1.1rem' }}>Contact Us</strong>
+          <a href="mailto:support@apnarozgaar.in" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span role="img" aria-label="Email">✉️</span> support@apnarozgaar.in
+          </a>
+          <a href="#" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span role="img" aria-label="Text/SMS">💬</span> SMS: +91 98765 43210
+          </a>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)' }}>
+            <span role="img" aria-label="Text Relay">📞</span> Text Relay: 18001
+          </div>
+          <div style={{ 
+            fontSize: '0.8rem', 
+            color: 'var(--text-muted)', 
+            padding: '8px 12px', 
+            background: 'rgba(124, 58, 237, 0.05)', 
+            borderRadius: '8px',
+            marginTop: '4px'
+          }}>
+            <span style={{ display: 'block', fontWeight: '600', color: 'var(--accent-purple)' }}>📵 No phone-only support</span>
+            All inquiries can be handled via email, chat, or text relay
+          </div>
+        </nav>
+      </div>
+
+      <div>
+        <nav aria-label="Social Media" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <strong style={{ color: 'var(--text-primary)', marginBottom: '8px', fontSize: '1.1rem' }}>Connect</strong>
           <a href="#">LinkedIn</a>
           <a href="#">Twitter</a>
           <a href="#">Instagram</a>
         </nav>
+      </div>
+    </div>
+    
+    {/* Deaf/HoH Resources Section */}
+    <div style={{ 
+      maxWidth: '1200px', 
+      margin: '40px auto 0', 
+      padding: '24px', 
+      background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(139, 92, 246, 0.05))', 
+      borderRadius: '16px',
+      border: '1px solid rgba(59, 130, 246, 0.1)'
+    }}>
+      <h3 style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px', fontSize: '1.1rem' }}>
+        <span role="img" aria-hidden="true">🤟</span> Deaf/HoH Communication Options
+      </h3>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+        <div style={{ flex: '1 1 200px' }}>
+          <strong style={{ color: 'var(--text-primary)' }}>Sign Language Support</strong>
+          <p style={{ margin: '4px 0 0' }}>BSL, ASL, and ISL interpreters available for video calls upon request.</p>
+        </div>
+        <div style={{ flex: '1 1 200px' }}>
+          <strong style={{ color: 'var(--text-primary)' }}>Live Chat</strong>
+          <p style={{ margin: '4px 0 0' }}>Our chat feature works with any text-based communication tool.</p>
+        </div>
+        <div style={{ flex: '1 1 200px' }}>
+          <strong style={{ color: 'var(--text-primary)' }}>Text Relay (UK/India)</strong>
+          <p style={{ margin: '4px 0 0' }}>We accept calls via Relay UK (18001) and Indian Relay Service.</p>
+        </div>
       </div>
     </div>
   </footer>
@@ -274,6 +359,9 @@ function App() {
         </main>
 
         <Footer />
+        
+        {/* Screen Reader - Text-to-Speech Feature */}
+        <ScreenReader />
       </div>
     </BrowserRouter>
   );

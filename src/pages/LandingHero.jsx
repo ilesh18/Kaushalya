@@ -83,7 +83,7 @@ export default function LandingHero() {
             </motion.div>
 
             <motion.div variants={itemVariants} style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-              {["2,400+ PwD Hired", "380+ Inclusive Employers", "WCAG AA Certified"].map((stat, i) => (
+              {["2,400+ PwD Hired", "380+ Inclusive Employers", "WCAG AA Certified", "Deaf/HoH Friendly 🤟"].map((stat, i) => (
                 <div key={i} className="glass" style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -103,6 +103,82 @@ export default function LandingHero() {
             </motion.div>
           </div>
         </motion.div>
+      </section>
+
+      {/* Deaf/HoH Welcome Section */}
+      <section 
+        style={{ 
+          padding: '60px 24px', 
+          background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(139, 92, 246, 0.05))',
+          borderTop: '1px solid rgba(59, 130, 246, 0.1)',
+          borderBottom: '1px solid rgba(59, 130, 246, 0.1)'
+        }}
+        aria-labelledby="deaf-welcome"
+      >
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            style={{ textAlign: 'center', marginBottom: '48px' }}
+          >
+            <h2 id="deaf-welcome" style={{ fontSize: '2.5rem', marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
+              <span role="img" aria-hidden="true">🤟</span>
+              Deaf & Hard of Hearing Welcome
+              <span role="img" aria-hidden="true">🤟</span>
+            </h2>
+            <p style={{ fontSize: '1.2rem', color: 'var(--text-muted)', maxWidth: '700px', margin: '0 auto' }}>
+              We're committed to full accessibility. No phone calls required. BSL/ASL/ISL support available.
+            </p>
+          </motion.div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px' }}>
+            {[
+              { icon: '📝', title: 'Live Captioning', desc: 'CART and auto-captions in all video meetings with employers' },
+              { icon: '🤟', title: 'Sign Language', desc: 'BSL, ASL, and ISL interpreters available for interviews' },
+              { icon: '💬', title: 'Text-Based', desc: 'Chat, email, and SMS - no voice calls required' },
+              { icon: '🔔', title: 'Visual Alerts', desc: 'Filter jobs by workplaces with visual fire alarms' }
+            ].map((feature, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="card"
+                style={{ padding: '32px', textAlign: 'center' }}
+              >
+                <div style={{ fontSize: '3rem', marginBottom: '16px' }} role="img" aria-hidden="true">{feature.icon}</div>
+                <h3 style={{ marginBottom: '12px', fontSize: '1.25rem' }}>{feature.title}</h3>
+                <p style={{ margin: 0, color: 'var(--text-muted)' }}>{feature.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            style={{ 
+              marginTop: '48px', 
+              padding: '24px', 
+              background: 'var(--card-bg)', 
+              borderRadius: '16px',
+              textAlign: 'center',
+              border: '1px solid var(--border)'
+            }}
+          >
+            <p style={{ margin: 0, fontSize: '1.1rem' }}>
+              <strong>Contact us your way:</strong>{' '}
+              <span style={{ color: 'var(--text-muted)' }}>
+                Email • SMS • Live Chat • Text Relay (18001) • WhatsApp
+              </span>
+              <span style={{ display: 'block', marginTop: '8px', color: 'var(--accent-purple)', fontWeight: '600' }}>
+                📵 No phone-only requirements
+              </span>
+            </p>
+          </motion.div>
+        </div>
       </section>
     </div>
   );

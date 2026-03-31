@@ -41,19 +41,41 @@ const chatResponses = {
     "That's an interesting question! 🤔 I'm still learning, but I'll do my best to help. Could you try rephrasing, or choose one of the quick actions below?",
     "Hmm, let me think about that! 💭 For the best assistance, try asking about jobs, profiles, accommodations, or how to use the platform. I'm here for you!",
     "I want to make sure I help you correctly! 🌟 Try asking about:\n• Finding jobs\n• Creating profiles\n• Accessibility features\n• Privacy concerns\n\nOr click a quick action button!"
+  ],
+  // NEW: Deaf/HoH specific responses
+  deafHoH: [
+    "Great question about Deaf/HoH support! 🤟\n\nWe're committed to Deaf accessibility:\n• Filter jobs by sign language support\n• Find employers with CART captioning\n• Text-based interview options\n• Video relay service (VRS) friendly\n• No phone calls required\n\nCheck the 'Deaf/HoH Friendly' filter in job search!",
+    "Our Deaf/HoH friendly features include: 🤟\n\n• BSL/ASL/ISL interpreter availability\n• Induction/hearing loop systems\n• Visual fire alarms at workplaces\n• Text relay (NGT/Relay UK) support\n• Live captioning in meetings\n\nAll job listings show Deaf accessibility badges!"
+  ],
+  signLanguage: [
+    "We support multiple sign languages! 🤟\n\n• British Sign Language (BSL)\n• American Sign Language (ASL)\n• Indian Sign Language (ISL)\n\nYou can specify your preferred sign language in your profile, and employers can indicate interpreter availability.\n\nFilter jobs by 'Sign Language Support' to find inclusive employers!",
+    "Sign language support is important to us! 🤟\n\nMany employers on our platform offer:\n• Sign language interpreters for interviews\n• BSL/ASL/ISL trained colleagues\n• Video relay service for calls\n\nSet your communication preferences in your profile!"
+  ],
+  captioning: [
+    "Live captioning & CART services: 📝\n\nWe highlight employers who provide:\n• CART (real-time captioning) in meetings\n• Auto-captions on video calls\n• Written meeting summaries\n• Captioned training videos\n\nLook for the 'CART' badge on job listings!",
+    "Captioning is crucial for accessibility! 📝\n\nOur platform shows:\n• Which employers use live captions\n• CART availability for interviews\n• Companies with captioned content\n\nYou can request CART for your interview - just mention it in your application!"
+  ],
+  textRelay: [
+    "Text Relay services we support: 📞➡️💬\n\n• Relay UK (prefix 18001)\n• NGT (Next Generation Text)\n• Indian Relay Service\n• Video Relay Service (VRS)\n\nEmployers can't require phone calls - text alternatives are always available!\n\nContact us via text relay anytime!",
+    "No phone calls required! 📵\n\nWe offer:\n• Email support\n• Live chat\n• SMS/text messaging\n• Text relay compatible\n• WhatsApp support\n\nYour communication preferences are respected!"
   ]
 };
 
-// Keywords for matching
+// Keywords for matching - Extended for Deaf/HoH
 const keywordMap = {
   jobSearch: ['job', 'jobs', 'find', 'search', 'work', 'position', 'opportunity', 'career', 'employment', 'hiring', 'opening'],
   profile: ['profile', 'account', 'resume', 'cv', 'register', 'sign up', 'create', 'build'],
-  accommodations: ['accommodation', 'accessible', 'accessibility', 'disability', 'wheelchair', 'blind', 'deaf', 'support', 'assistance', 'special needs', 'assistive'],
+  accommodations: ['accommodation', 'accessible', 'accessibility', 'disability', 'wheelchair', 'blind', 'support', 'assistance', 'special needs', 'assistive'],
   employers: ['employer', 'company', 'business', 'hire', 'recruit', 'post job', 'organization'],
   help: ['help', 'how', 'what', 'guide', 'tutorial', 'explain', 'assist', 'support'],
   privacy: ['privacy', 'private', 'data', 'secure', 'security', 'confidential', 'share', 'protect'],
   apply: ['apply', 'application', 'submit', 'send', 'interested'],
-  greetings: ['hi', 'hello', 'hey', 'good morning', 'good afternoon', 'good evening', 'namaste', 'hola']
+  greetings: ['hi', 'hello', 'hey', 'good morning', 'good afternoon', 'good evening', 'namaste', 'hola'],
+  // NEW: Deaf/HoH specific keywords
+  deafHoH: ['deaf', 'hoh', 'hard of hearing', 'hearing impair', 'hearing loss', 'tinnitus', 'cochlear', 'hearing aid'],
+  signLanguage: ['sign language', 'bsl', 'asl', 'isl', 'signing', 'interpreter', 'sign'],
+  captioning: ['caption', 'captions', 'captioning', 'cart', 'subtitle', 'transcription', 'transcript', 'live caption'],
+  textRelay: ['text relay', 'relay uk', 'ngt', 'typetalk', 'minicom', 'textphone', 'vrs', 'video relay', 'no phone']
 };
 
 const getResponse = (userMessage) => {
@@ -69,13 +91,13 @@ const getResponse = (userMessage) => {
   return chatResponses.default[Math.floor(Math.random() * chatResponses.default.length)];
 };
 
-// Suggested questions
+// Suggested questions - Extended for Deaf/HoH
 const suggestedQuestions = [
   "How do I find remote jobs?",
   "Is my disability information private?",
   "What companies are hiring?",
-  "How do I apply for a job?",
-  "Can I get help with my resume?"
+  "Do you support sign language?",
+  "Are there text-based interviews?"
 ];
 
 const ChatbotPage = () => {
@@ -543,7 +565,7 @@ const ChatbotPage = () => {
             </motion.div>
           ))}
           
-          {/* Typing indicator */}
+          {/* Typing indicator - Enhanced for Deaf/HoH users */}
           {isTyping && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
@@ -553,6 +575,9 @@ const ChatbotPage = () => {
                 gap: '16px',
                 alignItems: 'flex-start'
               }}
+              role="status"
+              aria-live="polite"
+              aria-label="Asha is typing a response"
             >
               <div style={{
                 width: '44px',
@@ -563,33 +588,39 @@ const ChatbotPage = () => {
                 alignItems: 'center',
                 justifyContent: 'center'
               }}>
-                <Bot size={22} color="white" />
+                <Bot size={22} color="white" aria-hidden="true" />
               </div>
-              <div style={{
+              <div className="typing-indicator-visual" style={{
                 padding: '16px 20px',
                 borderRadius: '20px 20px 20px 4px',
                 background: 'var(--card-bg)',
                 boxShadow: 'var(--card-shadow)',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '6px',
+                gap: '12px',
                 border: '1px solid var(--border)'
               }}>
-                <motion.span
-                  animate={{ opacity: [0.4, 1, 0.4] }}
-                  transition={{ duration: 1, repeat: Infinity }}
-                  style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'var(--accent-purple)' }}
-                />
-                <motion.span
-                  animate={{ opacity: [0.4, 1, 0.4] }}
-                  transition={{ duration: 1, repeat: Infinity, delay: 0.2 }}
-                  style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'var(--accent-purple)' }}
-                />
-                <motion.span
-                  animate={{ opacity: [0.4, 1, 0.4] }}
-                  transition={{ duration: 1, repeat: Infinity, delay: 0.4 }}
-                  style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'var(--accent-purple)' }}
-                />
+                <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Asha is typing</span>
+                <div className="dots" style={{ display: 'flex', gap: '4px' }}>
+                  <motion.span
+                    animate={{ opacity: [0.4, 1, 0.4] }}
+                    transition={{ duration: 1, repeat: Infinity }}
+                    className="dot"
+                    style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'var(--accent-purple)' }}
+                  />
+                  <motion.span
+                    animate={{ opacity: [0.4, 1, 0.4] }}
+                    transition={{ duration: 1, repeat: Infinity, delay: 0.2 }}
+                    className="dot"
+                    style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'var(--accent-purple)' }}
+                  />
+                  <motion.span
+                    animate={{ opacity: [0.4, 1, 0.4] }}
+                    transition={{ duration: 1, repeat: Infinity, delay: 0.4 }}
+                    className="dot"
+                    style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'var(--accent-purple)' }}
+                  />
+                </div>
               </div>
             </motion.div>
           )}
@@ -597,13 +628,15 @@ const ChatbotPage = () => {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Speaking indicator */}
+        {/* Speaking indicator - Visual feedback for Deaf/HoH users */}
         <AnimatePresence>
           {isSpeaking && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
+              role="status"
+              aria-live="polite"
               style={{
                 margin: '0 24px 12px',
                 padding: '12px 20px',
@@ -617,12 +650,15 @@ const ChatbotPage = () => {
               }}
             >
               <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Volume2 size={18} />
-                Asha is speaking...
+                <Volume2 size={18} aria-hidden="true" />
+                <span className="sound-indicator" style={{ background: 'rgba(255,255,255,0.2)', color: 'white' }}>
+                  🔊 Audio Playing
+                </span>
+                Asha is speaking... (Deaf users: text above)
               </span>
               <button
                 onClick={stopSpeaking}
-                aria-label="Stop speaking"
+                aria-label="Stop audio playback"
                 style={{
                   background: 'rgba(255,255,255,0.2)',
                   border: 'none',
@@ -633,7 +669,7 @@ const ChatbotPage = () => {
                   fontWeight: 500
                 }}
               >
-                Stop
+                Stop Audio
               </button>
             </motion.div>
           )}

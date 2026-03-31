@@ -41,19 +41,31 @@ const chatResponses = {
     "That's an interesting question! 🤔 I'm still learning, but I'll do my best to help. Could you try rephrasing, or choose one of the quick actions below?",
     "Hmm, let me think about that! 💭 For the best assistance, try asking about jobs, profiles, accommodations, or how to use the platform. I'm here for you!",
     "I want to make sure I help you correctly! 🌟 Try asking about:\n• Finding jobs\n• Creating profiles\n• Accessibility features\n• Privacy concerns\n\nOr click a quick action button!"
+  ],
+  // Deaf/HoH specific responses
+  deafHoH: [
+    "Great question about Deaf/HoH support! 🤟\n\nWe're committed to Deaf accessibility:\n• Filter jobs by sign language support\n• Find employers with CART captioning\n• Text-based interview options\n• Video relay service (VRS) friendly\n\nCheck the 'Deaf/HoH Friendly' filter in job search!",
+    "Our Deaf/HoH friendly features include: 🤟\n\n• BSL/ASL/ISL interpreter availability\n• Induction/hearing loop systems\n• Visual fire alarms at workplaces\n• Text relay support\n• Live captioning in meetings\n\nAll job listings show Deaf accessibility badges!"
+  ],
+  signLanguage: [
+    "We support multiple sign languages! 🤟\n\n• British Sign Language (BSL)\n• American Sign Language (ASL)\n• Indian Sign Language (ISL)\n\nYou can specify your preferred sign language in your profile!",
+    "Sign language support is important to us! 🤟\n\nMany employers offer:\n• Sign language interpreters for interviews\n• BSL/ASL/ISL trained colleagues\n• Video relay service for calls"
   ]
 };
 
-// Keywords for matching
+// Keywords for matching - Extended for Deaf/HoH
 const keywordMap = {
   jobSearch: ['job', 'jobs', 'find', 'search', 'work', 'position', 'opportunity', 'career', 'employment', 'hiring', 'opening'],
   profile: ['profile', 'account', 'resume', 'cv', 'register', 'sign up', 'create', 'build'],
-  accommodations: ['accommodation', 'accessible', 'accessibility', 'disability', 'wheelchair', 'blind', 'deaf', 'support', 'assistance', 'special needs', 'assistive'],
+  accommodations: ['accommodation', 'accessible', 'accessibility', 'disability', 'wheelchair', 'blind', 'support', 'assistance', 'special needs', 'assistive'],
   employers: ['employer', 'company', 'business', 'hire', 'recruit', 'post job', 'organization'],
   help: ['help', 'how', 'what', 'guide', 'tutorial', 'explain', 'assist', 'support'],
   privacy: ['privacy', 'private', 'data', 'secure', 'security', 'confidential', 'share', 'protect'],
   apply: ['apply', 'application', 'submit', 'send', 'interested'],
-  greetings: ['hi', 'hello', 'hey', 'good morning', 'good afternoon', 'good evening', 'namaste', 'hola']
+  greetings: ['hi', 'hello', 'hey', 'good morning', 'good afternoon', 'good evening', 'namaste', 'hola'],
+  // Deaf/HoH keywords
+  deafHoH: ['deaf', 'hoh', 'hard of hearing', 'hearing impair', 'hearing loss', 'tinnitus', 'cochlear', 'hearing aid'],
+  signLanguage: ['sign language', 'bsl', 'asl', 'isl', 'signing', 'interpreter', 'sign', 'caption', 'cart']
 };
 
 const getResponse = (userMessage) => {

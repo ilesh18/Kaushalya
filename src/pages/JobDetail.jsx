@@ -71,6 +71,60 @@ export default function JobDetail() {
             </div>
           </section>
 
+          {/* NEW: Deaf/HoH Accessibility Section */}
+          <section aria-labelledby="deaf-hoh-features" style={{ marginBottom: '40px' }}>
+            <h2 id="deaf-hoh-features" style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <span role="img" aria-hidden="true">🤟</span> Deaf/HoH Accessibility
+            </h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+              
+              <div className="glass" style={{ padding: '24px', borderRadius: '16px', background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(139, 92, 246, 0.05))', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+                <h3 style={{ fontSize: '1.2rem', color: 'var(--accent-purple)', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                  <span role="img" aria-hidden="true">📝</span> Live Captioning
+                </h3>
+                <p style={{ margin: 0, fontSize: '0.95rem' }}>All meetings use automatic live captions. CART (real-time captioning) available for important meetings upon request.</p>
+              </div>
+
+              <div className="glass" style={{ padding: '24px', borderRadius: '16px', background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(139, 92, 246, 0.05))', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+                <h3 style={{ fontSize: '1.2rem', color: 'var(--accent-purple)', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                  <span role="img" aria-hidden="true">🤟</span> Sign Language Support
+                </h3>
+                <p style={{ margin: 0, fontSize: '0.95rem' }}>BSL/ASL/ISL interpreters provided for interviews and onboarding. Video relay service (VRS) available for calls.</p>
+              </div>
+
+              <div className="glass" style={{ padding: '24px', borderRadius: '16px', background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(139, 92, 246, 0.05))', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+                <h3 style={{ fontSize: '1.2rem', color: 'var(--accent-purple)', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                  <span role="img" aria-hidden="true">💬</span> Text-Based Communication
+                </h3>
+                <p style={{ margin: 0, fontSize: '0.95rem' }}>Slack/Teams text chat is primary. No phone calls required. Email updates for all announcements.</p>
+              </div>
+
+              <div className="glass" style={{ padding: '24px', borderRadius: '16px', background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(139, 92, 246, 0.05))', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+                <h3 style={{ fontSize: '1.2rem', color: 'var(--accent-purple)', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                  <span role="img" aria-hidden="true">🔔</span> Visual Alerts
+                </h3>
+                <p style={{ margin: 0, fontSize: '0.95rem' }}>Visual fire alarms in office. Desktop notifications for all important alerts. No audio-only announcements.</p>
+              </div>
+
+            </div>
+
+            {/* Interview Options */}
+            <div style={{ marginTop: '24px', padding: '20px', background: 'var(--bg-secondary)', borderRadius: '12px' }}>
+              <h4 style={{ marginBottom: '12px', fontSize: '1rem' }}>Interview Accommodations Available:</h4>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                <span className="sign-language-badge">Sign Language Interpreter</span>
+                <span className="cart-badge">CART Captioning</span>
+                <span className="text-interview-badge">Text-Based Interview</span>
+                <span style={{ padding: '6px 14px', background: 'rgba(5, 150, 105, 0.1)', color: 'var(--success)', borderRadius: '20px', fontSize: '0.85rem', fontWeight: '600' }}>
+                  Written Questions in Advance
+                </span>
+                <span style={{ padding: '6px 14px', background: 'rgba(5, 150, 105, 0.1)', color: 'var(--success)', borderRadius: '20px', fontSize: '0.85rem', fontWeight: '600' }}>
+                  Extra Time
+                </span>
+              </div>
+            </div>
+          </section>
+
           <section aria-labelledby="job-desc">
             <h2 id="job-desc" style={{ marginBottom: '24px' }}>About the Role</h2>
             <p>We are seeking a highly skilled Senior Frontend Engineer to join our passionate team. At TechCorp India, we believe in building web experiences that are not only performant but inherently accessible to all users.</p>

@@ -5,10 +5,10 @@ import { Bookmark, Search, Filter, Briefcase, MapPin } from 'lucide-react';
 import { AccessibleButton } from '../App';
 
 const MOCK_JOBS = [
-  { id: 1, title: 'Senior Frontend Engineer', company: 'TechCorp India', logo: 'T', color: '#6B46C1', location: 'Bangalore', mode: 'Remote', salary: '₹18L - ₹24L', match: 96, tags: ['Screen Reader ✓', 'Remote ✓', 'Flexible Hours ✓'] },
-  { id: 2, title: 'Accessibility Consultant', company: 'Global Solutions', logo: 'G', color: '#0D9488', location: 'Pune', mode: 'Hybrid', salary: '₹12L - ₹18L', match: 92, tags: ['Wheelchair Access ✓', 'Sign Language ✓'] },
-  { id: 3, title: 'Data Analyst (Entry Level)', company: 'Finserve Tech', logo: 'F', color: '#D97706', location: 'Mumbai', mode: 'Remote', salary: '₹6L - ₹9L', match: 88, tags: ['Remote ✓', 'Screen Reader ✓', 'Quiet Workspace ✓'] },
-  { id: 4, title: 'Product Manager', company: 'InnovateX', logo: 'I', color: '#DC2626', location: 'Delhi', mode: 'Onsite', salary: '₹20L - ₹30L', match: 85, tags: ['Wheelchair Access ✓', 'Flexible Hours ✓'] }
+  { id: 1, title: 'Senior Frontend Engineer', company: 'TechCorp India', logo: 'T', color: '#6B46C1', location: 'Bangalore', mode: 'Remote', salary: '₹18L - ₹24L', match: 96, tags: ['Screen Reader ✓', 'Remote ✓', 'Flexible Hours ✓'], deafFriendly: true, signLanguage: true, captioning: true },
+  { id: 2, title: 'Accessibility Consultant', company: 'Global Solutions', logo: 'G', color: '#0D9488', location: 'Pune', mode: 'Hybrid', salary: '₹12L - ₹18L', match: 92, tags: ['Wheelchair Access ✓', 'Sign Language ✓'], deafFriendly: true, signLanguage: true, captioning: false, inductionLoop: true },
+  { id: 3, title: 'Data Analyst (Entry Level)', company: 'Finserve Tech', logo: 'F', color: '#D97706', location: 'Mumbai', mode: 'Remote', salary: '₹6L - ₹9L', match: 88, tags: ['Remote ✓', 'Screen Reader ✓', 'Quiet Workspace ✓'], deafFriendly: true, textInterview: true },
+  { id: 4, title: 'Product Manager', company: 'InnovateX', logo: 'I', color: '#DC2626', location: 'Delhi', mode: 'Onsite', salary: '₹20L - ₹30L', match: 85, tags: ['Wheelchair Access ✓', 'Flexible Hours ✓'], deafFriendly: false, visualAlarms: true }
 ];
 
 export default function JobListings() {
@@ -75,6 +75,27 @@ export default function JobListings() {
           </div>
         </fieldset>
 
+        {/* NEW: Deaf/HoH Specific Filters */}
+        <fieldset style={{ marginBottom: '32px', background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(139, 92, 246, 0.05))', padding: '16px', borderRadius: '12px', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+          <legend style={{ marginBottom: '16px', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span role="img" aria-label="Deaf/HoH">🤟</span> Deaf/HoH Friendly
+          </legend>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {[
+              { label: 'Sign language interpreters', value: 'sign-language' },
+              { label: 'Live captioning (CART)', value: 'captioning' },
+              { label: 'Induction/hearing loop', value: 'induction-loop' },
+              { label: 'Visual fire alarms', value: 'visual-alarms' },
+              { label: 'Text-based interviews', value: 'text-interview' },
+              { label: 'No phone calls required', value: 'no-phone' }
+            ].map(f => (
+              <label key={f.value} style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: 0, fontWeight: '500', cursor: 'pointer' }}>
+                <input type="checkbox" name="deafFilters" value={f.value} /> {f.label}
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
         <fieldset style={{ marginBottom: '32px' }}>
           <legend style={{ marginBottom: '16px', fontSize: '1.1rem' }}>Work Mode</legend>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -127,10 +148,41 @@ export default function JobListings() {
                     <h2 style={{ fontSize: '1.25rem', marginBottom: '4px' }}>
                       <Link to={`/jobs/${job.id}`} style={{ color: 'var(--text-primary)' }}>{job.title}</Link>
                     </h2>
-                    <div style={{ color: 'var(--text-muted)', fontWeight: '500', marginBottom: '16px', display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><Briefcase size={16} />{job.company}</span>
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><MapPin size={16} />{job.location} ({job.mode})</span>
+                    <div style={{ color: 'var(--text-muted)', fontWeight: '500', marginBottom: '12px', display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><Briefcase size={16} aria-hidden="true" />{job.company}</span>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><MapPin size={16} aria-hidden="true" />{job.location} ({job.mode})</span>
                     </div>
+
+                    {/* Deaf/HoH Friendly Badges */}
+                    {(job.deafFriendly || job.signLanguage || job.captioning || job.textInterview) && (
+                      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '12px' }}>
+                        {job.deafFriendly && (
+                          <span className="deaf-friendly-badge" style={{ fontSize: '0.75rem', padding: '4px 10px' }} title="Deaf/HoH Friendly Workplace">
+                            <span role="img" aria-hidden="true">🤟</span> Deaf Friendly
+                          </span>
+                        )}
+                        {job.signLanguage && (
+                          <span className="sign-language-badge" style={{ fontSize: '0.75rem', padding: '4px 10px' }} title="Sign Language Interpreters Available">
+                            BSL/ISL Support
+                          </span>
+                        )}
+                        {job.captioning && (
+                          <span className="cart-badge" style={{ fontSize: '0.75rem', padding: '4px 10px' }} title="Real-time Captioning Available">
+                            CART
+                          </span>
+                        )}
+                        {job.textInterview && (
+                          <span className="text-interview-badge" style={{ fontSize: '0.75rem', padding: '4px 10px' }} title="Text-based Interview Option">
+                            Text Interview ✓
+                          </span>
+                        )}
+                        {job.inductionLoop && (
+                          <span className="induction-loop-badge" style={{ fontSize: '0.75rem', padding: '4px 10px' }} title="Hearing Loop System Available">
+                            Loop System
+                          </span>
+                        )}
+                      </div>
+                    )}
 
                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                       {job.tags.map(t => (
