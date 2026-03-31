@@ -191,9 +191,9 @@ export default function JobDetail() {
 
             <div style={{ textAlign: 'center' }}>
               <button aria-label="Report accessibility issue with this job listing" style={{
-                background: 'transparent', border: 'none', color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: '500'
+                background: 'transparent', border: 'none', color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: '500', minHeight: '44px', padding: '8px 16px'
               }}>
-                <ShieldAlert size={16} /> Report Accessibility Issue
+                <ShieldAlert size={16} aria-hidden="true" /> Report Accessibility Issue
               </button>
             </div>
           </div>

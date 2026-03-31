@@ -446,26 +446,37 @@ const ChatbotPage = () => {
               <p style={{ color: 'var(--text-muted)', marginBottom: '16px' }}>
                 I can help you with finding jobs, creating your profile, understanding accommodations, and more. Try asking:
               </p>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }} role="list" aria-label="Suggested questions">
                 {suggestedQuestions.map((question, index) => (
                   <button
                     key={index}
+                    role="listitem"
                     onClick={() => sendMessage(question)}
+                    aria-label={`Ask: ${question}`}
                     style={{
-                      padding: '8px 16px',
+                      padding: '10px 18px',
                       background: 'var(--bg-secondary)',
                       border: '1px solid var(--border)',
                       borderRadius: '20px',
                       cursor: 'pointer',
-                      fontSize: '0.85rem',
+                      fontSize: '0.9rem',
                       color: 'var(--text-primary)',
-                      transition: 'all 0.2s'
+                      transition: 'all 0.2s',
+                      minHeight: '44px'
                     }}
                     onMouseEnter={e => {
                       e.currentTarget.style.borderColor = 'var(--accent-purple)';
                       e.currentTarget.style.background = 'rgba(124, 58, 237, 0.05)';
                     }}
                     onMouseLeave={e => {
+                      e.currentTarget.style.borderColor = 'var(--border)';
+                      e.currentTarget.style.background = 'var(--bg-secondary)';
+                    }}
+                    onFocus={e => {
+                      e.currentTarget.style.borderColor = 'var(--accent-purple)';
+                      e.currentTarget.style.background = 'rgba(124, 58, 237, 0.05)';
+                    }}
+                    onBlur={e => {
                       e.currentTarget.style.borderColor = 'var(--border)';
                       e.currentTarget.style.background = 'var(--bg-secondary)';
                     }}

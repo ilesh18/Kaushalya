@@ -65,17 +65,19 @@ export default function LandingHero() {
             </motion.p>
 
             <motion.div variants={itemVariants} style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', marginBottom: '48px' }}>
-              <Link to="/jobs" style={{ textDecoration: 'none' }} tabIndex="-1">
+              <Link to="/jobs" style={{ textDecoration: 'none' }}>
                 <AccessibleButton
                   style={{ minHeight: '56px', borderRadius: '14px', fontSize: '1.125rem', padding: '0 32px' }}
+                  aria-label="Browse all accessible job listings"
                 >
                   Browse Jobs
                 </AccessibleButton>
               </Link>
-              <Link to="/employer" style={{ textDecoration: 'none' }} tabIndex="-1">
+              <Link to="/employer" style={{ textDecoration: 'none' }}>
                 <AccessibleButton
                   variant="outline"
                   style={{ minHeight: '56px', borderRadius: '14px', fontSize: '1.125rem', padding: '0 32px', background: 'var(--card-bg)' }}
+                  aria-label="View employer dashboard and post jobs"
                 >
                   I'm an Employer
                 </AccessibleButton>
