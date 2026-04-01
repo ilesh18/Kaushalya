@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from 'react';
 import { BrowserRouter, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, MessageCircle } from 'lucide-react';
+import { Menu, X, MessageCircle, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import LandingHero from './pages/LandingHero';
 import ProfileBuilder from './pages/ProfileBuilder';
@@ -8,9 +8,11 @@ import JobListings from './pages/JobListings';
 import JobDetail from './pages/JobDetail';
 import EmployerDashboard from './pages/EmployerDashboard';
 import ChatbotPage from './pages/ChatbotPage';
+import AuthPage from './pages/AuthPage';
 import ScreenReader from './ScreenReader';
 import MotorAccessibilityToolbar from './MotorAccessibilityToolbar';
 import KeyboardShortcutsHelp from './KeyboardShortcutsHelp';
+import { useAuth } from './context/AuthContext';
 import faviconImg from './public/favicon.png';
 import './App.css';
 
@@ -93,6 +95,7 @@ const Header = () => {
   const mobileMenuRef = useRef(null);
   const menuButtonRef = useRef(null);
   const firstFocusableRef = useRef(null);
+  const { user, userProfile, logout, isAuthenticated } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -210,8 +213,39 @@ const Header = () => {
           </button>
           <span className="tooltip-text">Chat with Asha</span>
         </div>
-        <AccessibleButton variant="ghost" className="desktop-only" aria-label="Sign in to your account">Sign In</AccessibleButton>
-        <AccessibleButton className="desktop-only" aria-label="Post a new job listing">Post a Job</AccessibleButton>
+        {isAuthenticated ? (
+          <>
+            <span className="desktop-only" style={{ 
+              color: 'var(--text-primary)', 
+              fontWeight: '500',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}>
+              Hi, {userProfile?.name || user?.displayName || 'User'}
+            </span>
+            <AccessibleButton 
+              variant="ghost" 
+              className="desktop-only" 
+              onClick={async () => { await logout(); navigate('/'); }}
+              aria-label="Sign out of your account"
+              style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+            >
+              <LogOut size={18} />
+              Sign Out
+            </AccessibleButton>
+          </>
+        ) : (
+          <AccessibleButton 
+            variant="ghost" 
+            className="desktop-only" 
+            onClick={() => navigate('/auth')}
+            aria-label="Sign in to your account"
+          >
+            Sign In
+          </AccessibleButton>
+        )}
+        <AccessibleButton className="desktop-only" onClick={() => navigate('/employer')} aria-label="Post a new job listing">Post a Job</AccessibleButton>
         <button
           ref={menuButtonRef}
           className="mobile-only"
@@ -338,19 +372,51 @@ const Header = () => {
             
             <hr style={{ borderTop: '1px solid var(--border)', opacity: 0.5, margin: '8px 0' }} aria-hidden="true" />
             
+            {isAuthenticated ? (
+              <>
+                <div style={{ 
+                  padding: '16px 20px',
+                  fontSize: '1.1rem',
+                  color: 'var(--text-primary)',
+                  fontWeight: '500'
+                }}>
+                  Hi, {userProfile?.name || user?.displayName || 'User'}
+                </div>
+                <AccessibleButton 
+                  variant="ghost" 
+                  onClick={async () => { await logout(); closeMobileMenu(); navigate('/'); }}
+                  style={{ 
+                    justifyContent: 'flex-start', 
+                    padding: '16px 20px', 
+                    fontSize: '1.2rem',
+                    minHeight: '56px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px'
+                  }}
+                  aria-label="Sign out of your account"
+                >
+                  <LogOut size={20} />
+                  Sign Out
+                </AccessibleButton>
+              </>
+            ) : (
+              <AccessibleButton 
+                variant="ghost" 
+                onClick={() => { closeMobileMenu(); navigate('/auth'); }}
+                style={{ 
+                  justifyContent: 'flex-start', 
+                  padding: '16px 20px', 
+                  fontSize: '1.2rem',
+                  minHeight: '56px'
+                }}
+                aria-label="Sign in to your account"
+              >
+                Sign In
+              </AccessibleButton>
+            )}
             <AccessibleButton 
-              variant="ghost" 
-              style={{ 
-                justifyContent: 'flex-start', 
-                padding: '16px 20px', 
-                fontSize: '1.2rem',
-                minHeight: '56px'
-              }}
-              aria-label="Sign in to your account"
-            >
-              Sign In
-            </AccessibleButton>
-            <AccessibleButton 
+              onClick={() => { closeMobileMenu(); navigate('/employer'); }}
               style={{ 
                 width: '100%', 
                 minHeight: '56px',
@@ -410,7 +476,6 @@ const Footer = () => (
       
       {/* NEW: Contact Options for Deaf/HoH Users */}
       <div>
-<<<<<<< HEAD
         <nav aria-label="Contact Options" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <strong style={{ color: 'var(--text-primary)', marginBottom: '8px', fontSize: '1.1rem' }}>Contact Us</strong>
           <a href="mailto:support@apnarozgaar.in" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -536,6 +601,11 @@ const AnimatedRoutes = () => {
         <Route path="/chat" element={
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.3 }}>
             <ChatbotPage />
+          </motion.div>
+        } />
+        <Route path="/auth" element={
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.3 }}>
+            <AuthPage />
           </motion.div>
         } />
       </Routes>

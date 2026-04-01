@@ -1,6 +1,4 @@
 /* App.css - Component-specific styles */
-
-<<<<<<< HEAD
 /* Deaf/HoH Accessibility Component Styles */
 
 /* Sound state indicator for components with audio */
@@ -118,7 +116,6 @@
   font-size: 1.6rem;
   padding: 16px 24px;
 }
-=======
 /* Ensure all buttons have minimum size for motor accessibility */
 .accessible-btn {
   position: relative;
@@ -170,5 +167,3 @@
   transform: translateY(-2px);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 }
-
->>>>>>> 44026bafb663ceaa707cff2470db5619795e09aa

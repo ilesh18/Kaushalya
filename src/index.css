@@ -974,7 +974,6 @@ input[type="radio"] {
   content: '⚠';
 }
 
-<<<<<<< HEAD
 html[dir="rtl"] {}
 
 /* ========================================
@@ -1286,7 +1285,8 @@ html[dir="rtl"] {}
   border-radius: 20px;
   font-size: 0.85rem;
   font-weight: 600;
-=======
+}
+
 /* Form field with error state */
 input.has-error,
 select.has-error,
@@ -1369,5 +1369,4 @@ nav button {
   *:focus-visible {
     outline: 2px solid #000 !important;
   }
->>>>>>> 44026bafb663ceaa707cff2470db5619795e09aa
 }
