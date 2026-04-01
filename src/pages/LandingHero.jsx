@@ -56,7 +56,7 @@ export default function LandingHero() {
 
             <motion.p variants={itemVariants} style={{
               fontSize: '1.25rem',
-              color: 'var(--text-muted)',
+              color: '#000000',
               marginBottom: '40px',
               maxWidth: '600px',
               lineHeight: '1.6'
