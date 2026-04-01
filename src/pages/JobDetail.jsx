@@ -1,11 +1,32 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useParams } from 'react-router-dom';
-import { Briefcase, MapPin, DollarSign, Clock, ShieldAlert, ArrowLeft } from 'lucide-react';
+import { Briefcase, MapPin, DollarSign, Clock, ShieldAlert, ArrowLeft, CheckCircle, Mail } from 'lucide-react';
 import { AccessibleButton } from '../App';
 
 export default function JobDetail() {
   const { id } = useParams();
+  const [showNotification, setShowNotification] = useState(false);
+  const [notificationType, setNotificationType] = useState('applied'); // 'applied' or 'saved'
+  const [isSaved, setIsSaved] = useState(false);
+
+  useEffect(() => {
+    if (showNotification) {
+      const timer = setTimeout(() => setShowNotification(false), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showNotification]);
+
+  const handleApply = () => {
+    setNotificationType('applied');
+    setShowNotification(true);
+  };
+
+  const handleSaveJob = () => {
+    setIsSaved(!isSaved);
+    setNotificationType('saved');
+    setShowNotification(true);
+  };
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -182,11 +203,21 @@ export default function JobDetail() {
               </tbody>
             </table>
 
-            <AccessibleButton style={{ width: '100%', marginBottom: '16px', minHeight: '56px', fontSize: '1.1rem' }} aria-label="Apply for Senior Frontend Engineer at TechCorp India">
+            <AccessibleButton
+              onClick={handleApply}
+              style={{ width: '100%', marginBottom: '16px', minHeight: '56px', fontSize: '1.1rem' }}
+              aria-label="Apply for Senior Frontend Engineer at TechCorp India"
+            >
               Apply Now
             </AccessibleButton>
-            <AccessibleButton variant="outline" style={{ width: '100%', marginBottom: '24px', minHeight: '56px', fontSize: '1.1rem' }}>
-              Save Job
+            <AccessibleButton
+              variant={isSaved ? "primary" : "outline"}
+              onClick={handleSaveJob}
+              style={{ width: '100%', marginBottom: '24px', minHeight: '56px', fontSize: '1.1rem' }}
+              aria-label={`${isSaved ? 'Remove from' : 'Add to'} saved jobs`}
+              aria-pressed={isSaved}
+            >
+              {isSaved ? '✓ Job Saved' : 'Save Job'}
             </AccessibleButton>
 
             <div style={{ textAlign: 'center' }}>
@@ -199,6 +230,115 @@ export default function JobDetail() {
           </div>
         </motion.div>
       </motion.div>
+
+      {/* Success Notification */}
+      <AnimatePresence>
+        {showNotification && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.8 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 50, scale: 0.8 }}
+            transition={{ type: 'spring', damping: 20, stiffness: 200 }}
+            style={{
+              position: 'fixed',
+              bottom: '32px',
+              right: '32px',
+              zIndex: 1000,
+              maxWidth: '400px',
+            }}
+          >
+            <div
+              style={{
+                background: notificationType === 'applied'
+                  ? 'linear-gradient(135deg, rgba(5, 150, 105, 0.95), rgba(3, 102, 71, 0.95))'
+                  : 'linear-gradient(135deg, rgba(59, 130, 246, 0.95), rgba(139, 92, 246, 0.95))',
+                backdropFilter: 'blur(10px)',
+                border: notificationType === 'applied'
+                  ? '1px solid rgba(5, 150, 105, 0.5)'
+                  : '1px solid rgba(139, 92, 246, 0.5)',
+                borderRadius: '16px',
+                padding: '24px',
+                boxShadow: notificationType === 'applied'
+                  ? '0 20px 60px rgba(5, 150, 105, 0.3), 0 0 1px rgba(5, 150, 105, 0.5)'
+                  : '0 20px 60px rgba(139, 92, 246, 0.3), 0 0 1px rgba(139, 92, 246, 0.5)',
+                display: 'flex',
+                gap: '16px',
+                alignItems: 'flex-start',
+              }}
+            >
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+                style={{ flexShrink: 0, marginTop: '4px' }}
+              >
+                <CheckCircle size={32} color="white" strokeWidth={1.5} />
+              </motion.div>
+              <div style={{ flex: 1 }}>
+                <h3 style={{
+                  color: 'white',
+                  margin: '0 0 8px 0',
+                  fontSize: '1.1rem',
+                  fontWeight: '700'
+                }}>
+                  {notificationType === 'applied' ? 'Applied Successfully! 🎉' : 'Job Saved! 💼'}
+                </h3>
+                <p style={{
+                  color: 'rgba(255, 255, 255, 0.9)',
+                  margin: '0 0 12px 0',
+                  fontSize: '0.95rem',
+                  lineHeight: '1.5'
+                }}>
+                  {notificationType === 'applied'
+                    ? 'Your application has been submitted for Senior Frontend Engineer position.'
+                    : 'This job is now saved to your profile. You can view it anytime from your saved jobs.'}
+                </p>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  color: 'rgba(255, 255, 255, 0.85)',
+                  fontSize: '0.9rem',
+                  fontWeight: '500'
+                }}>
+                  {notificationType === 'applied' ? (
+                    <>
+                      <Mail size={16} aria-hidden="true" />
+                      <span>You will receive a confirmation mail on your registered email ID</span>
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle size={16} aria-hidden="true" />
+                      <span>Added to your saved jobs collection</span>
+                    </>
+                  )}
+                </div>
+              </div>
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => setShowNotification(false)}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.2)',
+                  border: 'none',
+                  color: 'white',
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '50%',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                  padding: 0
+                }}
+                aria-label="Close notification"
+              >
+                ×
+              </motion.button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
