@@ -1,8 +1,9 @@
 // Test Gemini API
-const API_KEY = 'AIzaSyB4Av96vcoOvo9lBr6sqFj09qUmVyt9UwI';
+const API_KEY = 'AIzaSyAbPTgf0_NMW9LDK4oZMwdjLB8sLlTXgMI';
 
 async function testGemini() {
-  const models = ['gemini-2.5-flash', 'gemma-3-4b-it', 'gemini-flash-latest'];
+  // Primary model used by the app, plus fallbacks
+  const models = ['gemini-2.0-flash', 'gemini-1.5-flash-latest', 'gemini-1.5-pro-latest'];
   
   for (const model of models) {
     console.log(`\nTesting ${model}...`);
@@ -11,7 +12,7 @@ async function testGemini() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: 'What is Infosys? Answer briefly.' }] }]
+          contents: [{ parts: [{ text: 'Say hello in one sentence.' }] }]
         })
       });
       const data = await response.json();
@@ -20,12 +21,14 @@ async function testGemini() {
         console.log('✓ SUCCESS with', model);
         console.log('Response:', data.candidates?.[0]?.content?.parts?.[0]?.text);
         return model;
+      } else {
+        console.log('Error:', data.error?.message || JSON.stringify(data));
       }
     } catch (err) {
       console.error('Error:', err.message);
     }
   }
-  console.log('\nAll models rate limited :(');
+  console.log('\nAll models failed :(');
 }
 
 testGemini();

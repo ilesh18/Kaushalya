@@ -1,6 +1,7 @@
 // Gemini AI Service for Chatbot
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+// Using gemini-2.0-flash - stable and widely available model
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 
 // System instruction for better formatting
 const SYSTEM_INSTRUCTION = `You are a helpful, friendly AI assistant. Format your responses to be clear and organized:

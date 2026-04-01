@@ -2,7 +2,8 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Send, Mic, MicOff, Volume2, VolumeX, Sparkles,
-  User, Bot, Loader2, RefreshCw, ArrowLeft, Heart, Star
+  User, Bot, Loader2, RefreshCw, ArrowLeft, Heart, Star,
+  MessageSquare, Trash2, Plus, Clock
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { getGeminiResponse, isGeminiConfigured } from '../services/geminiService';
@@ -115,11 +116,134 @@ const ChatbotPage = () => {
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
+  const [chatHistory, setChatHistory] = useState([]);
+  const [currentChatId, setCurrentChatId] = useState(null);
   
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const recognitionRef = useRef(null);
   const synthesisRef = useRef(null);
+
+  // Load chat history from localStorage
+  useEffect(() => {
+    const savedHistory = localStorage.getItem('chatHistory');
+    if (savedHistory) {
+      try {
+        const parsed = JSON.parse(savedHistory);
+        setChatHistory(parsed);
+      } catch (e) {
+        console.error('Failed to parse chat history:', e);
+      }
+    }
+  }, []);
+
+  // Save current chat to history when messages change
+  useEffect(() => {
+    if (messages.length > 1 && currentChatId) {
+      const updatedHistory = chatHistory.map(chat => 
+        chat.id === currentChatId 
+          ? { ...chat, messages, updatedAt: new Date().toISOString() }
+          : chat
+      );
+      setChatHistory(updatedHistory);
+      localStorage.setItem('chatHistory', JSON.stringify(updatedHistory));
+    }
+  }, [messages]);
+
+  // Start a new chat and save current one
+  const startNewChat = () => {
+    // Save current chat if it has messages
+    if (messages.length > 1) {
+      const firstUserMsg = messages.find(m => m.type === 'user');
+      const title = firstUserMsg ? firstUserMsg.text.slice(0, 30) + (firstUserMsg.text.length > 30 ? '...' : '') : 'New Chat';
+      
+      const newChatEntry = {
+        id: currentChatId || Date.now().toString(),
+        title,
+        messages,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      const existingIndex = chatHistory.findIndex(c => c.id === currentChatId);
+      let updatedHistory;
+      if (existingIndex >= 0) {
+        updatedHistory = [...chatHistory];
+        updatedHistory[existingIndex] = newChatEntry;
+      } else {
+        updatedHistory = [newChatEntry, ...chatHistory];
+      }
+      
+      setChatHistory(updatedHistory);
+      localStorage.setItem('chatHistory', JSON.stringify(updatedHistory));
+    }
+
+    // Reset to new chat
+    const newId = Date.now().toString();
+    setCurrentChatId(newId);
+    setMessages([
+      {
+        id: 1,
+        type: 'bot',
+        text: "Hello! 👋 I'm Asha, ready for a new conversation. How can I help you today?",
+        timestamp: new Date()
+      }
+    ]);
+  };
+
+  // Load a chat from history
+  const loadChat = (chatId) => {
+    const chat = chatHistory.find(c => c.id === chatId);
+    if (chat) {
+      // Save current chat first if it has content
+      if (messages.length > 1 && currentChatId && currentChatId !== chatId) {
+        const firstUserMsg = messages.find(m => m.type === 'user');
+        const title = firstUserMsg ? firstUserMsg.text.slice(0, 30) + (firstUserMsg.text.length > 30 ? '...' : '') : 'New Chat';
+        
+        const currentChatEntry = {
+          id: currentChatId,
+          title,
+          messages,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+
+        const existingIndex = chatHistory.findIndex(c => c.id === currentChatId);
+        if (existingIndex >= 0) {
+          chatHistory[existingIndex] = currentChatEntry;
+        } else {
+          chatHistory.unshift(currentChatEntry);
+        }
+        localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
+      }
+
+      setCurrentChatId(chatId);
+      setMessages(chat.messages.map(m => ({
+        ...m,
+        timestamp: new Date(m.timestamp)
+      })));
+    }
+  };
+
+  // Delete a chat from history
+  const deleteChat = (chatId, e) => {
+    e.stopPropagation();
+    const updatedHistory = chatHistory.filter(c => c.id !== chatId);
+    setChatHistory(updatedHistory);
+    localStorage.setItem('chatHistory', JSON.stringify(updatedHistory));
+    
+    if (currentChatId === chatId) {
+      setCurrentChatId(null);
+      setMessages([
+        {
+          id: 1,
+          type: 'bot',
+          text: "Hello! 👋 I'm Asha, your friendly ApnaRozgaar assistant. How can I assist you today?",
+          timestamp: new Date()
+        }
+      ]);
+    }
+  };
 
   // Initialize speech recognition
   useEffect(() => {
@@ -273,6 +397,34 @@ const ChatbotPage = () => {
 
   // Clear chat
   const clearChat = () => {
+    // Save current chat before clearing if it has content
+    if (messages.length > 1) {
+      const firstUserMsg = messages.find(m => m.type === 'user');
+      const title = firstUserMsg ? firstUserMsg.text.slice(0, 30) + (firstUserMsg.text.length > 30 ? '...' : '') : 'New Chat';
+      
+      const chatEntry = {
+        id: currentChatId || Date.now().toString(),
+        title,
+        messages,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      const existingIndex = chatHistory.findIndex(c => c.id === currentChatId);
+      let updatedHistory;
+      if (existingIndex >= 0) {
+        updatedHistory = [...chatHistory];
+        updatedHistory[existingIndex] = chatEntry;
+      } else {
+        updatedHistory = [chatEntry, ...chatHistory];
+      }
+      
+      setChatHistory(updatedHistory);
+      localStorage.setItem('chatHistory', JSON.stringify(updatedHistory));
+    }
+
+    const newId = Date.now().toString();
+    setCurrentChatId(newId);
     setMessages([
       {
         id: Date.now(),
@@ -393,6 +545,148 @@ const ChatbotPage = () => {
                 aria-label="Toggle voice responses"
               />
             </label>
+          </div>
+        </div>
+
+        {/* Chat History Section */}
+        <div style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: 0
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: '12px'
+          }}>
+            <h3 style={{ 
+              fontSize: '0.85rem', 
+              fontWeight: 600, 
+              color: 'var(--text-muted)',
+              margin: 0,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}>
+              <Clock size={14} />
+              Chat History
+            </h3>
+            <button
+              onClick={startNewChat}
+              aria-label="Start new chat"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                padding: '6px 12px',
+                background: 'var(--primary-gradient)',
+                border: 'none',
+                borderRadius: '8px',
+                color: 'white',
+                cursor: 'pointer',
+                fontSize: '0.8rem',
+                fontWeight: 500
+              }}
+            >
+              <Plus size={14} />
+              New
+            </button>
+          </div>
+          
+          <div style={{
+            flex: 1,
+            overflowY: 'auto',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px'
+          }}>
+            {chatHistory.length === 0 ? (
+              <p style={{ 
+                fontSize: '0.8rem', 
+                color: 'var(--text-muted)',
+                textAlign: 'center',
+                padding: '20px',
+                background: 'var(--bg-secondary)',
+                borderRadius: '8px'
+              }}>
+                No previous chats yet. Start a conversation!
+              </p>
+            ) : (
+              chatHistory.slice(0, 10).map((chat) => (
+                <motion.div
+                  key={chat.id}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  onClick={() => loadChat(chat.id)}
+                  style={{
+                    padding: '12px',
+                    background: currentChatId === chat.id ? 'rgba(124, 58, 237, 0.1)' : 'var(--bg-secondary)',
+                    borderRadius: '10px',
+                    cursor: 'pointer',
+                    border: currentChatId === chat.id ? '1px solid var(--accent-purple)' : '1px solid transparent',
+                    transition: 'all 0.2s',
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: '10px'
+                  }}
+                  onMouseEnter={e => {
+                    if (currentChatId !== chat.id) {
+                      e.currentTarget.style.background = 'var(--bg-primary)';
+                    }
+                  }}
+                  onMouseLeave={e => {
+                    if (currentChatId !== chat.id) {
+                      e.currentTarget.style.background = 'var(--bg-secondary)';
+                    }
+                  }}
+                >
+                  <MessageSquare size={16} color="var(--accent-purple)" style={{ flexShrink: 0, marginTop: '2px' }} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{
+                      margin: 0,
+                      fontSize: '0.85rem',
+                      fontWeight: 500,
+                      color: 'var(--text-primary)',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      {chat.title}
+                    </p>
+                    <p style={{
+                      margin: '4px 0 0',
+                      fontSize: '0.75rem',
+                      color: 'var(--text-muted)'
+                    }}>
+                      {new Date(chat.updatedAt).toLocaleDateString(undefined, { 
+                        month: 'short', 
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </p>
+                  </div>
+                  <button
+                    onClick={(e) => deleteChat(chat.id, e)}
+                    aria-label={`Delete chat: ${chat.title}`}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      padding: '4px',
+                      cursor: 'pointer',
+                      opacity: 0.5,
+                      transition: 'opacity 0.2s'
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.opacity = 1}
+                    onMouseLeave={e => e.currentTarget.style.opacity = 0.5}
+                  >
+                    <Trash2 size={14} color="var(--danger)" />
+                  </button>
+                </motion.div>
+              ))
+            )}
           </div>
         </div>
 
