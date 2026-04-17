@@ -38,7 +38,7 @@ const chatResponses = {
   ],
   apply: [
     "Applying for jobs is simple! 📤\n\n1. Find a job you love\n2. Click 'Apply Now'\n3. Your profile auto-fills the form\n4. Add a cover letter (optional)\n5. Submit!\n\nYou can track all applications in 'My Profile'. Good luck! 🍀",
-    "Ready to apply? Exciting! 🎉\n\nTips for success:\n• Customize your cover letter\n• Highlight relevant skills\n• Mention accommodation needs (if comfortable)\n• Follow up after a week\n\nYou've got this! 💪"
+    "Ready to apply? Excited! 🎉\n\nTips for success:\n• Customize your cover letter\n• Highlight relevant skills\n• Mention accommodation needs (if comfortable)\n• Follow up after a week\n\nYou've got this! 💪"
   ],
   default: [
     "That's an interesting question! 🤔 I'm still learning, but I'll do my best to help. Could you try rephrasing, or choose one of the quick actions below?",
@@ -120,6 +120,8 @@ const ChatbotPage = () => {
   const [voiceEnabled, setVoiceEnabled] = useState(true);
   const [chatHistory, setChatHistory] = useState([]);
   const [currentChatId, setCurrentChatId] = useState(null);
+  const [voices, setVoices] = useState([]);
+  const [selectedVoice, setSelectedVoice] = useState(null);
   
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
@@ -247,7 +249,7 @@ const ChatbotPage = () => {
     }
   };
 
-  // Initialize speech recognition
+  // Initialize speech recognition and synthesis
   useEffect(() => {
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -272,7 +274,33 @@ const ChatbotPage = () => {
       };
     }
 
+    const loadVoices = () => {
+      const v = window.speechSynthesis.getVoices();
+      if (v.length > 0) {
+        const voicesArray = Array.from(v);
+        setVoices(voicesArray);
+        
+        // Prioritize Microsoft Ravi, then any English (India) voice, then any English voice
+        const raviVoice = voicesArray.find(voice => voice.name.includes('Ravi'));
+        const indianVoice = voicesArray.find(voice => voice.lang === 'en-IN' || voice.lang === 'en_IN');
+        const englishVoice = voicesArray.find(voice => voice.lang.startsWith('en'));
+        
+        const bestVoice = raviVoice || indianVoice || englishVoice || voicesArray[0];
+        setSelectedVoice(bestVoice);
+        return true;
+      }
+      return false;
+    };
+
     synthesisRef.current = window.speechSynthesis;
+    
+    // Polling fallback as getVoices() can be empty initially
+    if (!loadVoices()) {
+      const interval = setInterval(() => {
+        if (loadVoices()) clearInterval(interval);
+      }, 100);
+      window.speechSynthesis.onvoiceschanged = loadVoices;
+    }
 
     return () => {
       if (recognitionRef.current) {
@@ -281,6 +309,7 @@ const ChatbotPage = () => {
       if (synthesisRef.current) {
         synthesisRef.current.cancel();
       }
+      window.speechSynthesis.onvoiceschanged = null;
     };
   }, []);
 
@@ -303,16 +332,16 @@ const ChatbotPage = () => {
     const cleanText = text.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '');
     
     const utterance = new SpeechSynthesisUtterance(cleanText);
-    utterance.rate = 0.9;
-    utterance.pitch = 1;
-    utterance.volume = 1;
+    if (selectedVoice) {
+      utterance.voice = selectedVoice;
+    }
     
     utterance.onstart = () => setIsSpeaking(true);
     utterance.onend = () => setIsSpeaking(false);
     utterance.onerror = () => setIsSpeaking(false);
     
     synthesisRef.current.speak(utterance);
-  }, [voiceEnabled]);
+  }, [voiceEnabled, selectedVoice]);
 
   // Toggle voice recognition
   const toggleListening = () => {

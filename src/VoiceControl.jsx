@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Mic, MicOff, X, Volume2, Navigation, MousePointer, 
+import {
+  Mic, MicOff, X, Volume2, Navigation, MousePointer,
   Search, Home, Briefcase, User, MessageCircle, Settings,
   ChevronUp, ChevronDown, ArrowLeft, HelpCircle, Zap, Target,
   Globe, Check, AlertCircle
@@ -20,7 +20,7 @@ const STORAGE_KEY = 'voice-control-settings';
 export default function VoiceControl() {
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   const [isOpen, setIsOpen] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [commandHistory, setCommandHistory] = useState([]);
@@ -32,6 +32,9 @@ export default function VoiceControl() {
     showTranscript: true,
   });
   const [showSettings, setShowSettings] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const [voices, setVoices] = useState([]);
+  const [selectedVoice, setSelectedVoice] = useState(null);
 
   const feedbackTimeoutRef = useRef(null);
 
@@ -52,24 +55,53 @@ export default function VoiceControl() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
   }, [settings]);
 
+  // Load voices
+  useEffect(() => {
+    const loadVoices = () => {
+      const v = window.speechSynthesis.getVoices();
+      if (v.length > 0) {
+        const voicesArray = Array.from(v);
+        setVoices(voicesArray);
+        
+        // Prioritize Microsoft Ravi, then any English (India) voice, then any English voice
+        const raviVoice = voicesArray.find(voice => voice.name.includes('Ravi'));
+        const indianVoice = voicesArray.find(voice => voice.lang === 'en-IN' || voice.lang === 'en_IN');
+        const englishVoice = voicesArray.find(voice => voice.lang.startsWith('en'));
+        
+        const bestVoice = raviVoice || indianVoice || englishVoice || voicesArray[0];
+        setSelectedVoice(bestVoice);
+        return true;
+      }
+      return false;
+    };
+
+    // Polling fallback as getVoices() can be empty initially
+    if (!loadVoices()) {
+      const interval = setInterval(() => {
+        if (loadVoices()) clearInterval(interval);
+      }, 100);
+      window.speechSynthesis.onvoiceschanged = loadVoices;
+    }
+  }, []);
+
   // Show feedback with auto-dismiss
   const showFeedback = useCallback((message, type = 'success') => {
     if (feedbackTimeoutRef.current) {
       clearTimeout(feedbackTimeoutRef.current);
     }
-    
+
     setFeedback({ message, type });
     announceToScreenReader(message);
-    
+
     // Play feedback sound
     if (settings.feedbackSound) {
       const audio = new Audio();
-      audio.src = type === 'success' 
+      audio.src = type === 'success'
         ? 'data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU' // Short beep
         : 'data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU'; // Error beep
       // Commenting out audio play to avoid issues, visual feedback is enough
     }
-    
+
     feedbackTimeoutRef.current = setTimeout(() => {
       setFeedback(null);
     }, 3000);
@@ -81,39 +113,39 @@ export default function VoiceControl() {
     'go home': () => { navigate('/'); showFeedback('Navigating to home page', 'success'); },
     'go to home': () => { navigate('/'); showFeedback('Navigating to home page', 'success'); },
     'home page': () => { navigate('/'); showFeedback('Navigating to home page', 'success'); },
-    
+
     'go to jobs': () => { navigate('/jobs'); showFeedback('Navigating to job listings', 'success'); },
     'find jobs': () => { navigate('/jobs'); showFeedback('Navigating to job listings', 'success'); },
     'job listings': () => { navigate('/jobs'); showFeedback('Navigating to job listings', 'success'); },
     'show jobs': () => { navigate('/jobs'); showFeedback('Navigating to job listings', 'success'); },
-    
+
     'go to profile': () => { navigate('/profile/create'); showFeedback('Navigating to profile', 'success'); },
     'create profile': () => { navigate('/profile/create'); showFeedback('Navigating to profile builder', 'success'); },
     'my profile': () => { navigate('/profile/create'); showFeedback('Navigating to profile', 'success'); },
-    
+
     'go to chat': () => { navigate('/chat'); showFeedback('Opening chat with Asha', 'success'); },
     'open chat': () => { navigate('/chat'); showFeedback('Opening chat with Asha', 'success'); },
     'talk to asha': () => { navigate('/chat'); showFeedback('Opening chat with Asha', 'success'); },
     'chat with asha': () => { navigate('/chat'); showFeedback('Opening chat with Asha', 'success'); },
-    
+
     'post a job': () => { navigate('/employer'); showFeedback('Navigating to employer dashboard', 'success'); },
     'employer dashboard': () => { navigate('/employer'); showFeedback('Navigating to employer dashboard', 'success'); },
-    
+
     'about us': () => { navigate('/about'); showFeedback('Navigating to about page', 'success'); },
     'go to about': () => { navigate('/about'); showFeedback('Navigating to about us', 'success'); },
-    
+
     'interview prep': () => { navigate('/interview-prep'); showFeedback('Navigating to interview prep', 'success'); },
     'interview help': () => { navigate('/interview-prep'); showFeedback('Navigating to interview prep', 'success'); },
     'practice interview': () => { navigate('/interview-prep'); showFeedback('Navigating to interview prep', 'success'); },
-    
+
     'sign in': () => { navigate('/auth'); showFeedback('Navigating to sign in', 'success'); },
     'login': () => { navigate('/auth'); showFeedback('Navigating to sign in', 'success'); },
     'sign up': () => { navigate('/auth'); showFeedback('Navigating to sign up', 'success'); },
-    
+
     'go back': () => { navigate(-1); showFeedback('Going back', 'success'); },
     'back': () => { navigate(-1); showFeedback('Going back', 'success'); },
     'previous page': () => { navigate(-1); showFeedback('Going back', 'success'); },
-    
+
     // Scrolling Commands
     'scroll down': () => { window.scrollBy({ top: 400, behavior: 'smooth' }); showFeedback('Scrolling down', 'success'); },
     'scroll up': () => { window.scrollBy({ top: -400, behavior: 'smooth' }); showFeedback('Scrolling up', 'success'); },
@@ -122,9 +154,9 @@ export default function VoiceControl() {
     'scroll to bottom': () => { window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); showFeedback('Scrolling to bottom', 'success'); },
     'page down': () => { window.scrollBy({ top: window.innerHeight * 0.8, behavior: 'smooth' }); showFeedback('Page down', 'success'); },
     'page up': () => { window.scrollBy({ top: -window.innerHeight * 0.8, behavior: 'smooth' }); showFeedback('Page up', 'success'); },
-    
+
     // Click Commands
-    'click': () => { 
+    'click': () => {
       const focused = document.activeElement;
       if (focused && focused !== document.body) {
         focused.click();
@@ -149,7 +181,7 @@ export default function VoiceControl() {
         showFeedback('Submit clicked', 'success');
       }
     },
-    
+
     // Focus Commands
     'next': () => {
       const focusable = getFocusableElements();
@@ -174,12 +206,15 @@ export default function VoiceControl() {
         showFeedback('No search field found', 'error');
       }
     },
-    
+
     // Accessibility Commands
     'read page': () => {
       const mainContent = document.querySelector('main') || document.body;
       const text = mainContent.innerText;
       const utterance = new SpeechSynthesisUtterance(text);
+      if (selectedVoice) {
+        utterance.voice = selectedVoice;
+      }
       window.speechSynthesis.speak(utterance);
       showFeedback('Reading page content', 'success');
     },
@@ -187,13 +222,13 @@ export default function VoiceControl() {
       window.speechSynthesis.cancel();
       showFeedback('Stopped reading', 'success');
     },
-    
+
     // UI Commands
     'show help': () => { setShowHelp(true); showFeedback('Showing voice commands help', 'success'); },
     'hide help': () => { setShowHelp(false); showFeedback('Help panel closed', 'success'); },
     'close': () => { setIsOpen(false); showFeedback('Voice control panel closed', 'success'); },
     'stop listening': () => { stopListening(); showFeedback('Voice control stopped', 'success'); },
-    
+
     // Dynamic search command
     'search for': (transcript) => {
       const query = transcript.replace(/search for/i, '').trim();
@@ -264,28 +299,28 @@ export default function VoiceControl() {
       '.chat-input textarea, ' +
       '.chatbot textarea'
     );
-    
+
     if (chatInput) {
       // Focus the input
       chatInput.focus();
-      
+
       // Set the value using native input value setter to trigger React state update
       const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
         window.HTMLTextAreaElement.prototype, 'value'
       )?.set || Object.getOwnPropertyDescriptor(
         window.HTMLInputElement.prototype, 'value'
       )?.set;
-      
+
       if (nativeInputValueSetter) {
         nativeInputValueSetter.call(chatInput, text);
       } else {
         chatInput.value = text;
       }
-      
+
       // Dispatch input event to trigger React onChange
       const inputEvent = new Event('input', { bubbles: true });
       chatInput.dispatchEvent(inputEvent);
-      
+
       return true;
     }
     return false;
@@ -300,7 +335,7 @@ export default function VoiceControl() {
       '.chat-send-btn, ' +
       'button:has(svg)'
     );
-    
+
     // Find button with Send icon or text
     const buttons = document.querySelectorAll('button');
     for (const btn of buttons) {
@@ -315,12 +350,12 @@ export default function VoiceControl() {
         }
       }
     }
-    
+
     if (sendBtn) {
       sendBtn.click();
       return true;
     }
-    
+
     // Fallback: press Enter on the textarea
     const chatInput = document.querySelector('textarea');
     if (chatInput) {
@@ -334,7 +369,7 @@ export default function VoiceControl() {
       chatInput.dispatchEvent(enterEvent);
       return true;
     }
-    
+
     return false;
   };
 
@@ -375,7 +410,7 @@ export default function VoiceControl() {
     language: settings.language,
     onResult: (text) => {
       const result = processCommand(text);
-      
+
       setCommandHistory(prev => [
         { text, matched: result.matched, timestamp: Date.now() },
         ...prev.slice(0, 9)
@@ -522,11 +557,16 @@ export default function VoiceControl() {
       >
         {/* Status Label */}
         <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
+          initial={{ opacity: 0, x: 20, scale: 0.8 }}
+          animate={{
+            opacity: (isHovered || isListening) ? 1 : 0,
+            x: (isHovered || isListening) ? 0 : 20,
+            scale: (isHovered || isListening) ? 1 : 0.8
+          }}
+          transition={{ type: 'spring', damping: 20, stiffness: 300 }}
           style={{
-            background: isListening 
-              ? 'var(--success)' 
+            background: isListening
+              ? 'var(--success)'
               : 'var(--card-bg)',
             padding: '8px 14px',
             borderRadius: '20px',
@@ -539,6 +579,7 @@ export default function VoiceControl() {
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
+            pointerEvents: (isHovered || isListening) ? 'auto' : 'none',
           }}
         >
           {isListening ? (
@@ -552,14 +593,29 @@ export default function VoiceControl() {
               }} />
               Listening...
             </>
+          ) : isHovered ? (
+            <motion.span
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+            >
+              <Volume2 size={16} /> 🎤 Voice Control
+            </motion.span>
           ) : (
-            <>🎤 Voice Control</>
+            <motion.span
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+            >
+              🎤 Voice Control
+            </motion.span>
           )}
         </motion.div>
 
         {/* Main Toggle Button */}
         <motion.button
           onClick={() => setIsOpen(!isOpen)}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
           aria-label={isOpen ? 'Close voice control' : 'Open voice control'}
@@ -621,7 +677,7 @@ export default function VoiceControl() {
               left: '50%',
               transform: 'translateX(-50%)',
               padding: '14px 24px',
-              background: feedback.type === 'success' 
+              background: feedback.type === 'success'
                 ? 'var(--success)'
                 : 'var(--danger)',
               color: 'white',

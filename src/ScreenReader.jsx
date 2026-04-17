@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Volume2, VolumeX, Pause, Play, Settings } from 'lucide-react';
 
 /**
@@ -18,23 +19,41 @@ export default function ScreenReader() {
   const [selectedVoice, setSelectedVoice] = useState(null);
   const [showSettings, setShowSettings] = useState(false);
   const [currentWord, setCurrentWord] = useState('');
+  const [isHovered, setIsHovered] = useState(false);
   
   const utteranceRef = useRef(null);
 
   // Load available voices
   useEffect(() => {
     const loadVoices = () => {
-      const availableVoices = window.speechSynthesis.getVoices();
-      setVoices(availableVoices);
-      const englishVoice = availableVoices.find(v => v.lang.startsWith('en')) || availableVoices[0];
-      setSelectedVoice(englishVoice);
+      const v = window.speechSynthesis.getVoices();
+      if (v.length > 0) {
+        const voicesArray = Array.from(v);
+        setVoices(voicesArray);
+        
+        // Prioritize Microsoft Ravi, then any English (India) voice, then any English voice
+        const raviVoice = voicesArray.find(voice => voice.name.includes('Ravi'));
+        const indianVoice = voicesArray.find(voice => voice.lang === 'en-IN' || voice.lang === 'en_IN');
+        const englishVoice = voicesArray.find(voice => voice.lang.startsWith('en'));
+        
+        const bestVoice = raviVoice || indianVoice || englishVoice || voicesArray[0];
+        setSelectedVoice(bestVoice);
+        return true;
+      }
+      return false;
     };
 
-    loadVoices();
-    window.speechSynthesis.onvoiceschanged = loadVoices;
+    // Polling fallback as getVoices() can be empty initially
+    if (!loadVoices()) {
+      const interval = setInterval(() => {
+        if (loadVoices()) clearInterval(interval);
+      }, 100);
+      window.speechSynthesis.onvoiceschanged = loadVoices;
+    }
 
     return () => {
       window.speechSynthesis.cancel();
+      window.speechSynthesis.onvoiceschanged = null;
     };
   }, []);
 
@@ -141,7 +160,14 @@ export default function ScreenReader() {
         }}
       >
         {/* Text Label */}
-        <div
+        <motion.div
+          initial={{ opacity: 0, x: 20, scale: 0.8 }}
+          animate={{ 
+            opacity: (isHovered || isReading) ? 1 : 0, 
+            x: (isHovered || isReading) ? 0 : 20,
+            scale: (isHovered || isReading) ? 1 : 0.8
+          }}
+          transition={{ type: 'spring', damping: 20, stiffness: 300 }}
           style={{
             background: 'var(--card-bg)',
             padding: '8px 14px',
@@ -152,14 +178,19 @@ export default function ScreenReader() {
             fontWeight: 600,
             color: 'var(--text-primary)',
             whiteSpace: 'nowrap',
+            pointerEvents: (isHovered || isReading) ? 'auto' : 'none',
           }}
         >
           🔊 {isReading ? 'Reading...' : 'Read Aloud'}
-        </div>
+        </motion.div>
         
         {/* Button */}
-        <button
+        <motion.button
           onClick={() => setIsOpen(!isOpen)}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
           className="screen-reader-toggle"
           aria-label={isOpen ? 'Close screen reader' : 'Open screen reader'}
           aria-expanded={isOpen}
@@ -179,7 +210,7 @@ export default function ScreenReader() {
           }}
         >
           {isReading ? <Volume2 size={24} /> : <VolumeX size={24} />}
-        </button>
+        </motion.button>
       </div>
 
       {/* Screen Reader Panel */}
