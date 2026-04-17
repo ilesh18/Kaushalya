@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
+import {
   Send, Mic, MicOff, Volume2, VolumeX, Sparkles,
   User, Bot, Loader2, RefreshCw, ArrowLeft, Heart, Star,
   MessageSquare, Trash2, Plus, Clock
@@ -83,14 +83,14 @@ const keywordMap = {
 
 const getResponse = (userMessage) => {
   const lowerMessage = userMessage.toLowerCase();
-  
+
   for (const [category, keywords] of Object.entries(keywordMap)) {
     if (keywords.some(keyword => lowerMessage.includes(keyword))) {
       const responses = chatResponses[category];
       return responses[Math.floor(Math.random() * responses.length)];
     }
   }
-  
+
   return chatResponses.default[Math.floor(Math.random() * chatResponses.default.length)];
 };
 
@@ -122,7 +122,7 @@ const ChatbotPage = () => {
   const [currentChatId, setCurrentChatId] = useState(null);
   const [voices, setVoices] = useState([]);
   const [selectedVoice, setSelectedVoice] = useState(null);
-  
+
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const recognitionRef = useRef(null);
@@ -144,8 +144,8 @@ const ChatbotPage = () => {
   // Save current chat to history when messages change
   useEffect(() => {
     if (messages.length > 1 && currentChatId) {
-      const updatedHistory = chatHistory.map(chat => 
-        chat.id === currentChatId 
+      const updatedHistory = chatHistory.map(chat =>
+        chat.id === currentChatId
           ? { ...chat, messages, updatedAt: new Date().toISOString() }
           : chat
       );
@@ -160,7 +160,7 @@ const ChatbotPage = () => {
     if (messages.length > 1) {
       const firstUserMsg = messages.find(m => m.type === 'user');
       const title = firstUserMsg ? firstUserMsg.text.slice(0, 30) + (firstUserMsg.text.length > 30 ? '...' : '') : 'New Chat';
-      
+
       const newChatEntry = {
         id: currentChatId || Date.now().toString(),
         title,
@@ -177,7 +177,7 @@ const ChatbotPage = () => {
       } else {
         updatedHistory = [newChatEntry, ...chatHistory];
       }
-      
+
       setChatHistory(updatedHistory);
       localStorage.setItem('chatHistory', JSON.stringify(updatedHistory));
     }
@@ -203,7 +203,7 @@ const ChatbotPage = () => {
       if (messages.length > 1 && currentChatId && currentChatId !== chatId) {
         const firstUserMsg = messages.find(m => m.type === 'user');
         const title = firstUserMsg ? firstUserMsg.text.slice(0, 30) + (firstUserMsg.text.length > 30 ? '...' : '') : 'New Chat';
-        
+
         const currentChatEntry = {
           id: currentChatId,
           title,
@@ -235,7 +235,7 @@ const ChatbotPage = () => {
     const updatedHistory = chatHistory.filter(c => c.id !== chatId);
     setChatHistory(updatedHistory);
     localStorage.setItem('chatHistory', JSON.stringify(updatedHistory));
-    
+
     if (currentChatId === chatId) {
       setCurrentChatId(null);
       setMessages([
@@ -279,12 +279,12 @@ const ChatbotPage = () => {
       if (v.length > 0) {
         const voicesArray = Array.from(v);
         setVoices(voicesArray);
-        
+
         // Prioritize Microsoft Ravi, then any English (India) voice, then any English voice
         const raviVoice = voicesArray.find(voice => voice.name.includes('Ravi'));
         const indianVoice = voicesArray.find(voice => voice.lang === 'en-IN' || voice.lang === 'en_IN');
         const englishVoice = voicesArray.find(voice => voice.lang.startsWith('en'));
-        
+
         const bestVoice = raviVoice || indianVoice || englishVoice || voicesArray[0];
         setSelectedVoice(bestVoice);
         return true;
@@ -293,7 +293,7 @@ const ChatbotPage = () => {
     };
 
     synthesisRef.current = window.speechSynthesis;
-    
+
     // Polling fallback as getVoices() can be empty initially
     if (!loadVoices()) {
       const interval = setInterval(() => {
@@ -326,20 +326,20 @@ const ChatbotPage = () => {
   // Text-to-speech function
   const speakText = useCallback((text) => {
     if (!voiceEnabled || !synthesisRef.current) return;
-    
+
     synthesisRef.current.cancel();
-    
+
     const cleanText = text.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '');
-    
+
     const utterance = new SpeechSynthesisUtterance(cleanText);
     if (selectedVoice) {
       utterance.voice = selectedVoice;
     }
-    
+
     utterance.onstart = () => setIsSpeaking(true);
     utterance.onend = () => setIsSpeaking(false);
     utterance.onerror = () => setIsSpeaking(false);
-    
+
     synthesisRef.current.speak(utterance);
   }, [voiceEnabled, selectedVoice]);
 
@@ -426,7 +426,7 @@ const ChatbotPage = () => {
 
     setIsTyping(false);
     setMessages(prev => [...prev, botResponse]);
-    
+
     speakText(botResponse.text);
   };
 
@@ -444,7 +444,7 @@ const ChatbotPage = () => {
     if (messages.length > 1) {
       const firstUserMsg = messages.find(m => m.type === 'user');
       const title = firstUserMsg ? firstUserMsg.text.slice(0, 30) + (firstUserMsg.text.length > 30 ? '...' : '') : 'New Chat';
-      
+
       const chatEntry = {
         id: currentChatId || Date.now().toString(),
         title,
@@ -461,7 +461,7 @@ const ChatbotPage = () => {
       } else {
         updatedHistory = [chatEntry, ...chatHistory];
       }
-      
+
       setChatHistory(updatedHistory);
       localStorage.setItem('chatHistory', JSON.stringify(updatedHistory));
     }
@@ -558,9 +558,9 @@ const ChatbotPage = () => {
           background: 'var(--bg-secondary)',
           borderRadius: '12px'
         }}>
-          <h3 style={{ 
-            fontSize: '0.85rem', 
-            fontWeight: 600, 
+          <h3 style={{
+            fontSize: '0.85rem',
+            fontWeight: 600,
             color: 'var(--text-muted)',
             marginBottom: '12px'
           }}>
@@ -604,9 +604,9 @@ const ChatbotPage = () => {
             justifyContent: 'space-between',
             marginBottom: '12px'
           }}>
-            <h3 style={{ 
-              fontSize: '0.85rem', 
-              fontWeight: 600, 
+            <h3 style={{
+              fontSize: '0.85rem',
+              fontWeight: 600,
               color: 'var(--text-muted)',
               margin: 0,
               display: 'flex',
@@ -637,7 +637,7 @@ const ChatbotPage = () => {
               New
             </button>
           </div>
-          
+
           <div style={{
             flex: 1,
             overflowY: 'auto',
@@ -646,8 +646,8 @@ const ChatbotPage = () => {
             gap: '8px'
           }}>
             {chatHistory.length === 0 ? (
-              <p style={{ 
-                fontSize: '0.8rem', 
+              <p style={{
+                fontSize: '0.8rem',
                 color: 'var(--text-muted)',
                 textAlign: 'center',
                 padding: '20px',
@@ -703,8 +703,8 @@ const ChatbotPage = () => {
                       fontSize: '0.75rem',
                       color: 'var(--text-muted)'
                     }}>
-                      {new Date(chat.updatedAt).toLocaleDateString(undefined, { 
-                        month: 'short', 
+                      {new Date(chat.updatedAt).toLocaleDateString(undefined, {
+                        month: 'short',
                         day: 'numeric',
                         hour: '2-digit',
                         minute: '2-digit'
@@ -861,8 +861,8 @@ const ChatbotPage = () => {
                 width: '44px',
                 height: '44px',
                 borderRadius: '50%',
-                background: message.type === 'user' 
-                  ? 'var(--accent-teal)' 
+                background: message.type === 'user'
+                  ? 'var(--accent-teal)'
                   : 'var(--accent-purple)',
                 display: 'flex',
                 alignItems: 'center',
@@ -870,17 +870,17 @@ const ChatbotPage = () => {
                 flexShrink: 0,
                 boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
               }}>
-                {message.type === 'user' 
+                {message.type === 'user'
                   ? <User size={22} color="white" />
                   : <Bot size={22} color="white" />
                 }
               </div>
-              
+
               {/* Message bubble */}
               <div style={{
                 maxWidth: '70%',
                 padding: '16px 20px',
-                borderRadius: message.type === 'user' 
+                borderRadius: message.type === 'user'
                   ? '20px 20px 4px 20px'
                   : '20px 20px 20px 4px',
                 background: message.type === 'user'
@@ -894,7 +894,7 @@ const ChatbotPage = () => {
                 border: message.type === 'bot' ? '1px solid var(--border)' : 'none'
               }}>
                 {message.text}
-                
+
                 {/* Actions for bot messages */}
                 {message.type === 'bot' && (
                   <div style={{
@@ -931,7 +931,7 @@ const ChatbotPage = () => {
               </div>
             </motion.div>
           ))}
-          
+
           {/* Typing indicator - Enhanced for Deaf/HoH users */}
           {isTyping && (
             <motion.div
@@ -991,7 +991,7 @@ const ChatbotPage = () => {
               </div>
             </motion.div>
           )}
-          
+
           <div ref={messagesEndRef} />
         </div>
 
@@ -1127,7 +1127,7 @@ const ChatbotPage = () => {
               onBlur={e => e.currentTarget.style.borderColor = 'var(--border)'}
               disabled={isListening}
             />
-            
+
             {/* Send button */}
             <motion.button
               onClick={() => sendMessage()}

@@ -62,9 +62,9 @@ export const getGroqResponse = async (userMessage, history = []) => {
       console.error('Groq API error:', response.status, data);
       return null;
     }
-    
+
     const responseText = data.choices?.[0]?.message?.content;
-    
+
     if (!responseText) {
       console.error('No response text in Groq response:', data);
       return null;

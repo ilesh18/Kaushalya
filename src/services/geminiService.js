@@ -60,9 +60,9 @@ export const getGeminiResponse = async (userMessage) => {
       console.error('Gemini API error:', response.status, data);
       return null;
     }
-    
+
     const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    
+
     if (!responseText) {
       console.error('No response text in Gemini response:', data);
       return null;
