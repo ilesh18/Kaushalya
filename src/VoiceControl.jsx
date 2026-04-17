@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Mic, MicOff, X, Volume2, Navigation, MousePointer, 
   Search, Home, Briefcase, User, MessageCircle, Settings,
-  ChevronUp, ChevronDown, ArrowLeft, HelpCircle, Zap,
+  ChevronUp, ChevronDown, ArrowLeft, HelpCircle, Zap, Target,
   Globe, Check, AlertCircle
 } from 'lucide-react';
 import { useVoiceControl, useVoiceCommands } from './useVoiceControl';
@@ -98,6 +98,13 @@ export default function VoiceControl() {
     
     'post a job': () => { navigate('/employer'); showFeedback('Navigating to employer dashboard', 'success'); },
     'employer dashboard': () => { navigate('/employer'); showFeedback('Navigating to employer dashboard', 'success'); },
+    
+    'about us': () => { navigate('/about'); showFeedback('Navigating to about page', 'success'); },
+    'go to about': () => { navigate('/about'); showFeedback('Navigating to about us', 'success'); },
+    
+    'interview prep': () => { navigate('/interview-prep'); showFeedback('Navigating to interview prep', 'success'); },
+    'interview help': () => { navigate('/interview-prep'); showFeedback('Navigating to interview prep', 'success'); },
+    'practice interview': () => { navigate('/interview-prep'); showFeedback('Navigating to interview prep', 'success'); },
     
     'sign in': () => { navigate('/auth'); showFeedback('Navigating to sign in', 'success'); },
     'login': () => { navigate('/auth'); showFeedback('Navigating to sign in', 'success'); },
@@ -417,6 +424,8 @@ export default function VoiceControl() {
         { phrase: '"Go to jobs"', action: 'Open job listings' },
         { phrase: '"Go to profile"', action: 'Open profile builder' },
         { phrase: '"Go to chat"', action: 'Open AI assistant' },
+        { phrase: '"About us"', action: 'Learn about our mission' },
+        { phrase: '"Interview prep"', action: 'Practice for interviews' },
         { phrase: '"Go back"', action: 'Previous page' },
         { phrase: '"Search for [query]"', action: 'Search jobs' },
       ]
@@ -517,7 +526,7 @@ export default function VoiceControl() {
           animate={{ opacity: 1, x: 0 }}
           style={{
             background: isListening 
-              ? 'linear-gradient(135deg, #059669, #10B981)' 
+              ? 'var(--success)' 
               : 'var(--card-bg)',
             padding: '8px 14px',
             borderRadius: '20px',
@@ -560,8 +569,8 @@ export default function VoiceControl() {
             height: '56px',
             borderRadius: '50%',
             background: isListening
-              ? 'linear-gradient(135deg, #059669, #10B981)'
-              : 'linear-gradient(135deg, var(--accent-purple), #4F46E5)',
+              ? 'var(--success)'
+              : 'var(--accent-purple)',
             color: 'white',
             border: 'none',
             cursor: 'pointer',
@@ -613,8 +622,8 @@ export default function VoiceControl() {
               transform: 'translateX(-50%)',
               padding: '14px 24px',
               background: feedback.type === 'success' 
-                ? 'linear-gradient(135deg, #059669, #10B981)'
-                : 'linear-gradient(135deg, #DC2626, #EF4444)',
+                ? 'var(--success)'
+                : 'var(--danger)',
               color: 'white',
               borderRadius: '12px',
               boxShadow: '0 10px 40px rgba(0, 0, 0, 0.2)',
@@ -662,7 +671,7 @@ export default function VoiceControl() {
             {/* Header */}
             <div style={{
               padding: '20px',
-              background: 'linear-gradient(135deg, var(--accent-purple), #4F46E5)',
+              background: 'var(--accent-purple)',
               color: 'white',
             }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -916,7 +925,7 @@ export default function VoiceControl() {
                                 fontSize: '0.85rem',
                                 fontWeight: 600,
                                 color: 'var(--accent-purple)',
-                                background: 'rgba(124, 58, 237, 0.1)',
+                                background: 'rgba(37, 99, 235, 0.1)',
                                 padding: '4px 8px',
                                 borderRadius: '6px',
                               }}>
@@ -946,6 +955,8 @@ export default function VoiceControl() {
                         { icon: Briefcase, label: 'Jobs', path: '/jobs' },
                         { icon: User, label: 'Profile', path: '/profile/create' },
                         { icon: MessageCircle, label: 'Chat', path: '/chat' },
+                        { icon: Target, label: 'About', path: '/about' },
+                        { icon: Zap, label: 'Practice', path: '/interview-prep' },
                         { icon: ArrowLeft, label: 'Back', action: () => navigate(-1) },
                         { icon: ChevronUp, label: 'Top', action: () => window.scrollTo({ top: 0, behavior: 'smooth' }) },
                       ].map((item) => {
@@ -959,7 +970,7 @@ export default function VoiceControl() {
                               padding: '12px 8px',
                               borderRadius: '12px',
                               border: isActive ? '2px solid var(--accent-purple)' : '1px solid var(--border)',
-                              background: isActive ? 'rgba(124, 58, 237, 0.1)' : 'var(--bg-secondary)',
+                              background: isActive ? 'rgba(37, 99, 235, 0.1)' : 'var(--bg-secondary)',
                               color: isActive ? 'var(--accent-purple)' : 'var(--text-primary)',
                               cursor: 'pointer',
                               display: 'flex',
@@ -1036,8 +1047,8 @@ export default function VoiceControl() {
                   borderRadius: '12px',
                   border: 'none',
                   background: isListening
-                    ? 'linear-gradient(135deg, #DC2626, #EF4444)'
-                    : 'linear-gradient(135deg, var(--accent-purple), #4F46E5)',
+                    ? 'var(--danger)'
+                    : 'var(--accent-purple)',
                   color: 'white',
                   fontSize: '1rem',
                   fontWeight: 700,

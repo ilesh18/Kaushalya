@@ -156,9 +156,7 @@ const AuthPage = () => {
           fontSize: '2rem',
           fontWeight: '700',
           marginBottom: '8px',
-          background: 'linear-gradient(135deg, var(--accent-purple), var(--accent-teal))',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent'
+          color: 'var(--accent-purple)'
         }}>
           {isLogin ? 'Welcome Back' : 'Create Account'}
         </h1>
@@ -361,7 +359,7 @@ const AuthPage = () => {
             style={{
               width: '100%',
               padding: '16px',
-              background: 'linear-gradient(135deg, var(--accent-purple), var(--accent-teal))',
+              background: 'var(--accent-purple)',
               color: 'white',
               border: 'none',
               borderRadius: '12px',

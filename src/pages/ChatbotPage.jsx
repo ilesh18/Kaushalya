@@ -483,7 +483,7 @@ const ChatbotPage = () => {
         <div style={{
           textAlign: 'center',
           padding: '24px',
-          background: 'var(--primary-gradient)',
+          background: 'var(--accent-purple)',
           borderRadius: '20px',
           color: 'white'
         }}>
@@ -595,7 +595,7 @@ const ChatbotPage = () => {
                 alignItems: 'center',
                 gap: '4px',
                 padding: '6px 12px',
-                background: 'var(--primary-gradient)',
+                background: 'var(--accent-purple)',
                 border: 'none',
                 borderRadius: '8px',
                 color: 'white',
@@ -724,7 +724,7 @@ const ChatbotPage = () => {
         {/* Mobile Header */}
         <div className="mobile-only" style={{
           padding: '16px',
-          background: 'var(--primary-gradient)',
+          background: 'var(--accent-purple)',
           color: 'white',
           display: 'flex',
           alignItems: 'center',
@@ -833,8 +833,8 @@ const ChatbotPage = () => {
                 height: '44px',
                 borderRadius: '50%',
                 background: message.type === 'user' 
-                  ? 'var(--teal-gradient)' 
-                  : 'var(--primary-gradient)',
+                  ? 'var(--accent-teal)' 
+                  : 'var(--accent-purple)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -855,7 +855,7 @@ const ChatbotPage = () => {
                   ? '20px 20px 4px 20px'
                   : '20px 20px 20px 4px',
                 background: message.type === 'user'
-                  ? 'var(--primary-gradient)'
+                  ? 'var(--accent-purple)'
                   : 'var(--card-bg)',
                 color: message.type === 'user' ? 'white' : 'var(--text-primary)',
                 boxShadow: 'var(--card-shadow)',
@@ -921,7 +921,7 @@ const ChatbotPage = () => {
                 width: '44px',
                 height: '44px',
                 borderRadius: '50%',
-                background: 'var(--primary-gradient)',
+                background: 'var(--accent-purple)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
@@ -1114,7 +1114,7 @@ const ChatbotPage = () => {
                 width: '44px',
                 height: '44px',
                 borderRadius: '50%',
-                background: inputValue.trim() ? 'var(--primary-gradient)' : 'var(--bg-secondary)',
+                background: inputValue.trim() ? 'var(--accent-purple)' : 'var(--bg-secondary)',
                 border: 'none',
                 cursor: inputValue.trim() ? 'pointer' : 'not-allowed',
                 display: 'flex',

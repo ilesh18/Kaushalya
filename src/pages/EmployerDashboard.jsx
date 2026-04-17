@@ -5,7 +5,7 @@ import { AccessibleButton } from '../App';
 
 export default function EmployerDashboard() {
   const [desc, setDesc] = useState('');
-  
+
   // Accessibility Checklist States - Extended for Deaf/HoH support
   const [checks, setChecks] = useState({
     // Physical
@@ -18,12 +18,12 @@ export default function EmployerDashboard() {
     h1: false, h2: false, h3: false, h4: false, h5: false, h6: false,
   });
 
-  const toggleCheck = (id) => setChecks({...checks, [id]: !checks[id]});
-  
+  const toggleCheck = (id) => setChecks({ ...checks, [id]: !checks[id] });
+
   const score = Object.values(checks).filter(Boolean).length;
   const maxScore = 18; // Updated for new checklist items
   const scorePct = (score / maxScore) * 100;
-  
+
   let scoreColor = 'var(--danger)';
   if (scorePct >= 80) scoreColor = 'var(--success)';
   else if (scorePct >= 50) scoreColor = 'var(--accent-amber)';
@@ -32,7 +32,7 @@ export default function EmployerDashboard() {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
   };
-  
+
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { type: 'spring' } }
@@ -40,20 +40,20 @@ export default function EmployerDashboard() {
 
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '60px 24px', display: 'flex', flexDirection: 'column', gap: '48px' }}>
-      
+
       {/* Header section */}
       <motion.section variants={containerVariants} initial="hidden" animate="visible" aria-labelledby="dashboard-heading">
         <h1 id="dashboard-heading" style={{ fontSize: '3rem', marginBottom: '16px' }}>Welcome, TechCorp India</h1>
-        
+
         <div className="glass" style={{ padding: '24px', borderRadius: '16px', display: 'flex', alignItems: 'center', gap: '24px', flexWrap: 'wrap' }}>
           <div style={{ flex: '1 1 300px' }}>
             <h2 style={{ fontSize: '1.2rem', marginBottom: '8px' }}>Your Accessibility Score: 87/100</h2>
             <div role="progressbar" aria-valuenow="87" aria-valuemin="0" aria-valuemax="100" style={{ height: '12px', background: 'var(--border)', borderRadius: '6px', overflow: 'hidden' }}>
-              <motion.div 
+              <motion.div
                 initial={{ width: 0 }}
-                animate={{ width: '87%' }} 
+                animate={{ width: '87%' }}
                 transition={{ duration: 1.5, ease: 'easeOut' }}
-                style={{ height: '100%', background: 'var(--success)' }} 
+                style={{ height: '100%', background: 'var(--success)' }}
               />
             </div>
           </div>
@@ -74,7 +74,7 @@ export default function EmployerDashboard() {
             <div style={{ color: 'var(--text-muted)', fontWeight: '600', marginTop: '8px' }}>Active Postings</div>
           </div>
         </motion.div>
-        
+
         <motion.div variants={itemVariants} className="card" style={{ padding: '32px', display: 'flex', alignItems: 'center', gap: '24px' }}>
           <div style={{ width: '64px', height: '64px', borderRadius: '16px', background: 'rgba(13, 148, 136, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Users size={32} color="var(--accent-teal)" aria-hidden="true" />
@@ -99,10 +99,10 @@ export default function EmployerDashboard() {
       {/* Post a Job Form */}
       <motion.section variants={containerVariants} initial="hidden" whileInView="visible" viewport={{ once: true }}>
         <h2 style={{ fontSize: '2.5rem', marginBottom: '32px' }}>Post a New Job</h2>
-        
+
         <div className="card" style={{ padding: '48px', position: 'relative', overflow: 'hidden' }}>
           <form onSubmit={e => e.preventDefault()}>
-            
+
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '32px', marginBottom: '40px' }}>
               <div>
                 <label htmlFor="jobTitle">Job Title</label>
@@ -110,13 +110,13 @@ export default function EmployerDashboard() {
               </div>
               <div>
                 <label htmlFor="company">Company Name</label>
-                <input id="company" type="text" value="TechCorp India" readOnly disabled style={{ opacity: 0.7 }} autoComplete="organization" />
+                <input id="company" type="text" value="TechCorp India" enabled style={{ opacity: 0.7 }} autoComplete="organization" />
               </div>
               <div>
                 <label htmlFor="location">Location</label>
                 <input id="location" type="text" required autoComplete="address-level2" />
               </div>
-              
+
               <fieldset style={{ gridColumn: '1 / -1' }}>
                 <legend style={{ marginBottom: '16px' }}>Work Mode</legend>
                 <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
@@ -127,16 +127,16 @@ export default function EmployerDashboard() {
                   ))}
                 </div>
               </fieldset>
-              
+
               <div style={{ gridColumn: '1 / -1' }}>
                 <label htmlFor="jobDesc" style={{ display: 'flex', justifyContent: 'space-between' }}>
                   Job Description
                   <span id="charCount" style={{ color: desc.length > 5000 ? 'var(--danger)' : 'var(--text-muted)' }}>{desc.length}/5000</span>
                 </label>
-                <textarea 
-                  id="jobDesc" 
-                  rows={6} 
-                  required 
+                <textarea
+                  id="jobDesc"
+                  rows={6}
+                  required
                   aria-describedby="charCount"
                   value={desc}
                   onChange={(e) => setDesc(e.target.value)}
@@ -174,7 +174,7 @@ export default function EmployerDashboard() {
               </p>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '32px' }}>
-                
+
                 <fieldset className="glass" style={{ padding: '24px', borderRadius: '16px' }}>
                   <legend style={{ fontSize: '1.25rem', marginBottom: '24px', color: 'var(--text-primary)' }}>Physical Accessibility</legend>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -206,7 +206,7 @@ export default function EmployerDashboard() {
                 </fieldset>
 
                 {/* NEW: Deaf/Hard of Hearing Specific Accessibility */}
-                <fieldset className="glass" style={{ padding: '24px', borderRadius: '16px', background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(139, 92, 246, 0.05))', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+                <fieldset className="glass" style={{ padding: '24px', borderRadius: '16px', background: 'rgba(37, 99, 235, 0.05)', border: '1px solid rgba(37, 99, 235, 0.2)' }}>
                   <legend style={{ fontSize: '1.25rem', marginBottom: '24px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span role="img" aria-label="Deaf/HoH">🤟</span> Deaf/HoH Accessibility
                   </legend>
@@ -215,12 +215,12 @@ export default function EmployerDashboard() {
                   </p>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                     <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', margin: 0 }}>
-                      <input type="checkbox" checked={checks.h1} onChange={() => toggleCheck('h1')} /> 
+                      <input type="checkbox" checked={checks.h1} onChange={() => toggleCheck('h1')} />
                       <span>Induction/hearing loop system available</span>
                       <span className="induction-loop-badge" style={{ marginLeft: 'auto', fontSize: '0.7rem', padding: '2px 8px' }}>T-coil compatible</span>
                     </label>
                     <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', margin: 0 }}>
-                      <input type="checkbox" checked={checks.h2} onChange={() => toggleCheck('h2')} /> 
+                      <input type="checkbox" checked={checks.h2} onChange={() => toggleCheck('h2')} />
                       <span>Visual fire alarms/alerts installed</span>
                       <span className="visual-alarm-badge" style={{ marginLeft: 'auto', fontSize: '0.7rem', padding: '2px 8px' }}>Safety</span>
                     </label>
@@ -233,27 +233,27 @@ export default function EmployerDashboard() {
               </div>
 
               <div style={{ marginTop: '48px', padding: '24px', background: 'var(--bg-primary)', borderRadius: '16px', border: `2px solid ${scoreColor}` }}>
-                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px', fontWeight: '700', fontSize: '1.2rem', color: scoreColor }}>
-                   <span>Accessibility Score: {score}/{maxScore} checks completed</span>
-                   <span>{scorePct.toFixed(0)}%</span>
-                 </div>
-                 <div role="progressbar" aria-valuenow={score} aria-valuemin="0" aria-valuemax={maxScore} aria-label={`Accessibility score: ${score} out of ${maxScore}, ${scorePct.toFixed(0)} percent`} style={{ height: '16px', background: 'var(--border)', borderRadius: '8px', overflow: 'hidden' }}>
-                    <motion.div 
-                      key={score}
-                      initial={{ width: 0 }}
-                      animate={{ width: `${scorePct}%` }}
-                      transition={{ type: 'spring' }}
-                      style={{ height: '100%', background: scoreColor }}
-                    />
-                 </div>
-                 {/* Deaf/HoH specific score indicator */}
-                 {(checks.h1 || checks.h2 || checks.h3 || checks.h4 || checks.h5 || checks.h6) && (
-                   <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                     <span className="deaf-friendly-badge">
-                       <span role="img" aria-hidden="true">🤟</span> Deaf/HoH Friendly Workplace
-                     </span>
-                   </div>
-                 )}
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px', fontWeight: '700', fontSize: '1.2rem', color: scoreColor }}>
+                  <span>Accessibility Score: {score}/{maxScore} checks completed</span>
+                  <span>{scorePct.toFixed(0)}%</span>
+                </div>
+                <div role="progressbar" aria-valuenow={score} aria-valuemin="0" aria-valuemax={maxScore} aria-label={`Accessibility score: ${score} out of ${maxScore}, ${scorePct.toFixed(0)} percent`} style={{ height: '16px', background: 'var(--border)', borderRadius: '8px', overflow: 'hidden' }}>
+                  <motion.div
+                    key={score}
+                    initial={{ width: 0 }}
+                    animate={{ width: `${scorePct}%` }}
+                    transition={{ type: 'spring' }}
+                    style={{ height: '100%', background: scoreColor }}
+                  />
+                </div>
+                {/* Deaf/HoH specific score indicator */}
+                {(checks.h1 || checks.h2 || checks.h3 || checks.h4 || checks.h5 || checks.h6) && (
+                  <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span className="deaf-friendly-badge">
+                      <span role="img" aria-hidden="true">🤟</span> Deaf/HoH Friendly Workplace
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
 

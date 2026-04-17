@@ -99,28 +99,28 @@ export default function JobDetail() {
             </h2>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
               
-              <div className="glass" style={{ padding: '24px', borderRadius: '16px', background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(139, 92, 246, 0.05))', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+              <div className="glass" style={{ padding: '24px', borderRadius: '16px', background: 'rgba(37, 99, 235, 0.05)', border: '1px solid rgba(37, 99, 235, 0.2)' }}>
                 <h3 style={{ fontSize: '1.2rem', color: 'var(--accent-purple)', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
                   <span role="img" aria-hidden="true">📝</span> Live Captioning
                 </h3>
                 <p style={{ margin: 0, fontSize: '0.95rem' }}>All meetings use automatic live captions. CART (real-time captioning) available for important meetings upon request.</p>
               </div>
 
-              <div className="glass" style={{ padding: '24px', borderRadius: '16px', background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(139, 92, 246, 0.05))', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+              <div className="glass" style={{ padding: '24px', borderRadius: '16px', background: 'rgba(37, 99, 235, 0.05)', border: '1px solid rgba(37, 99, 235, 0.2)' }}>
                 <h3 style={{ fontSize: '1.2rem', color: 'var(--accent-purple)', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
                   <span role="img" aria-hidden="true">🤟</span> Sign Language Support
                 </h3>
                 <p style={{ margin: 0, fontSize: '0.95rem' }}>BSL/ASL/ISL interpreters provided for interviews and onboarding. Video relay service (VRS) available for calls.</p>
               </div>
 
-              <div className="glass" style={{ padding: '24px', borderRadius: '16px', background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(139, 92, 246, 0.05))', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+              <div className="glass" style={{ padding: '24px', borderRadius: '16px', background: 'rgba(37, 99, 235, 0.05)', border: '1px solid rgba(37, 99, 235, 0.2)' }}>
                 <h3 style={{ fontSize: '1.2rem', color: 'var(--accent-purple)', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
                   <span role="img" aria-hidden="true">💬</span> Text-Based Communication
                 </h3>
                 <p style={{ margin: 0, fontSize: '0.95rem' }}>Slack/Teams text chat is primary. No phone calls required. Email updates for all announcements.</p>
               </div>
 
-              <div className="glass" style={{ padding: '24px', borderRadius: '16px', background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(139, 92, 246, 0.05))', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+              <div className="glass" style={{ padding: '24px', borderRadius: '16px', background: 'rgba(37, 99, 235, 0.05)', border: '1px solid rgba(37, 99, 235, 0.2)' }}>
                 <h3 style={{ fontSize: '1.2rem', color: 'var(--accent-purple)', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
                   <span role="img" aria-hidden="true">🔔</span> Visual Alerts
                 </h3>
@@ -170,17 +170,11 @@ export default function JobDetail() {
               <div style={{ position: 'relative', width: '160px', height: '160px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <svg width="160" height="160" style={{ transform: 'rotate(-90deg)', position: 'absolute' }}>
                   <circle cx="80" cy="80" r="70" stroke="var(--border)" strokeWidth="12" fill="none" />
-                  <circle cx="80" cy="80" r="70" stroke="url(#gradient)" strokeWidth="12" fill="none" strokeDasharray="440" strokeDashoffset="22" strokeLinecap="round" style={{ transition: 'stroke-dashoffset 1s ease-out' }} />
-                  <defs>
-                    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stopColor="var(--accent-purple)" />
-                      <stop offset="100%" stopColor="var(--accent-teal)" />
-                    </linearGradient>
-                  </defs>
+                  <circle cx="80" cy="80" r="70" stroke="var(--accent-purple)" strokeWidth="12" fill="none" strokeDasharray="440" strokeDashoffset="22" strokeLinecap="round" style={{ transition: 'stroke-dashoffset 1s ease-out' }} />
                 </svg>
                 <div style={{ 
                   fontSize: '2.5rem', fontWeight: '800', 
-                  background: 'var(--primary-gradient)', WebkitBackgroundClip: 'text', color: 'transparent'
+                  color: 'var(--accent-purple)'
                 }}>95%</div>
               </div>
               <div style={{ fontSize: '1.2rem', fontWeight: '700', marginTop: '16px' }}>AI Match Score</div>
@@ -250,8 +244,8 @@ export default function JobDetail() {
             <div
               style={{
                 background: notificationType === 'applied'
-                  ? 'linear-gradient(135deg, rgba(5, 150, 105, 0.95), rgba(3, 102, 71, 0.95))'
-                  : 'linear-gradient(135deg, rgba(59, 130, 246, 0.95), rgba(139, 92, 246, 0.95))',
+                  ? 'var(--success)'
+                  : 'var(--accent-purple)',
                 backdropFilter: 'blur(10px)',
                 border: notificationType === 'applied'
                   ? '1px solid rgba(5, 150, 105, 0.5)'

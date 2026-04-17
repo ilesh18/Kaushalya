@@ -174,7 +174,7 @@ export default function ScreenReader() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 4px 20px rgba(124, 58, 237, 0.4)',
+            boxShadow: '0 4px 20px var(--accent-purple-glow)',
             transition: 'all 0.3s ease',
           }}
         >
@@ -204,7 +204,7 @@ export default function ScreenReader() {
           {/* Header */}
           <div style={{
             padding: '16px',
-            background: 'linear-gradient(135deg, var(--accent-purple), var(--accent-teal))',
+            background: 'var(--accent-purple)',
             color: 'white',
           }}>
             <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600 }}>

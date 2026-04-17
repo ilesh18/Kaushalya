@@ -28,7 +28,8 @@ export default function LandingHero() {
           padding: '100px 24px 60px',
           overflow: 'hidden',
           position: 'relative',
-          backgroundImage: `linear-gradient(to right, rgba(251, 250, 253, 0.2)  30%, rgba(245, 243, 251, 0.2) 30%), linear-gradient(rgba(0,0,0,0.08), rgba(0,0,0,0.08)), url(${heroImg})`,
+          backgroundColor: 'var(--bg-secondary)',
+          backgroundImage: `url(${heroImg})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center'
         }}
@@ -82,26 +83,6 @@ export default function LandingHero() {
                   I'm an Employer
                 </AccessibleButton>
               </Link>
-            </motion.div>
-
-            <motion.div variants={itemVariants} style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-              {["2,400+ PwD Hired", "380+ Inclusive Employers", "WCAG AA Certified", "Deaf/HoH Friendly 🤟"].map((stat, i) => (
-                <div key={i} className="glass" style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  padding: '10px 20px',
-                  borderRadius: '30px',
-                  fontSize: '0.95rem',
-                  fontWeight: '600',
-                  color: 'var(--text-primary)'
-                }}>
-                  <div style={{ background: 'rgba(5,150,105,0.1)', borderRadius: '50%', padding: '4px' }}>
-                    <Check size={14} color="var(--success)" aria-hidden="true" strokeWidth={3} />
-                  </div>
-                  {stat}
-                </div>
-              ))}
             </motion.div>
           </div>
         </motion.div>

@@ -323,17 +323,6 @@ apnarozgaar/
 
 ---
 
-## 📊 Platform Statistics
-
-<p align="center">
-  <b>2,400+</b> PwD Hired &nbsp;•&nbsp;
-  <b>380+</b> Inclusive Employers &nbsp;•&nbsp;
-  <b>500+</b> Accessible Jobs &nbsp;•&nbsp;
-  <b>WCAG AA</b> Certified
-</p>
-
----
-
 ## 🤝 Contributing
 
 We welcome contributions! Here's how:

@@ -84,7 +84,7 @@ export default function JobListings() {
         </fieldset>
 
         {/* NEW: Deaf/HoH Specific Filters */}
-        <fieldset style={{ marginBottom: '32px', background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(139, 92, 246, 0.05))', padding: '16px', borderRadius: '12px', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+        <fieldset style={{ marginBottom: '32px', background: 'rgba(37, 99, 235, 0.05)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(37, 99, 235, 0.2)' }}>
           <legend style={{ marginBottom: '16px', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span role="img" aria-label="Deaf/HoH">🤟</span> Deaf/HoH Friendly
           </legend>
@@ -206,8 +206,7 @@ export default function JobListings() {
                 <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'space-between', gap: '16px' }}>
                   <div style={{ textAlign: 'center' }}>
                     <div style={{ 
-                      fontSize: '2rem', fontWeight: '800', color: 'var(--accent-purple)', lineHeight: '1', 
-                      background: 'var(--primary-gradient)', WebkitBackgroundClip: 'text', color: 'transparent' 
+                      fontSize: '2rem', fontWeight: '800', color: 'var(--accent-purple)', lineHeight: '1'
                     }}>{job.match}%</div>
                     <div style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Match Score</div>
                   </div>

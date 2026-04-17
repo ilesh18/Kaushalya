@@ -13,7 +13,7 @@
 }
 
 .audio-state-indicator.playing {
-  background: rgba(124, 58, 237, 0.1);
+  background: rgba(37, 99, 235, 0.1);
   color: var(--accent-purple);
 }
 
@@ -46,7 +46,7 @@
 .focus-enhanced:focus {
   outline: 4px solid var(--accent-purple);
   outline-offset: 4px;
-  box-shadow: 0 0 0 8px rgba(124, 58, 237, 0.2);
+  box-shadow: 0 0 0 8px rgba(37, 99, 235, 0.2);
 }
 
 /* Message status visual indicators */
@@ -131,7 +131,7 @@
   left: -100%;
   width: 50%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  background: rgba(255, 255, 255, 0.2);
   transition: left 0.5s ease;
 }
 

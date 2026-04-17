@@ -382,7 +382,7 @@ const AccessibleChatbot = ({ isOpen: externalIsOpen, onOpenChange }) => {
           width: '64px',
           height: '64px',
           borderRadius: '50%',
-          background: 'var(--primary-gradient)',
+          background: 'var(--accent-purple)',
           border: 'none',
           cursor: 'pointer',
           display: 'flex',
@@ -475,7 +475,7 @@ const AccessibleChatbot = ({ isOpen: externalIsOpen, onOpenChange }) => {
             {/* Header */}
             <div style={{
               padding: '20px',
-              background: 'var(--primary-gradient)',
+              background: 'var(--accent-purple)',
               color: 'white',
               display: 'flex',
               alignItems: 'center',
@@ -592,8 +592,8 @@ const AccessibleChatbot = ({ isOpen: externalIsOpen, onOpenChange }) => {
                     height: '36px',
                     borderRadius: '50%',
                     background: message.type === 'user'
-                      ? 'var(--teal-gradient)'
-                      : 'var(--primary-gradient)',
+                      ? 'var(--accent-teal)'
+                      : 'var(--accent-purple)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -665,7 +665,7 @@ const AccessibleChatbot = ({ isOpen: externalIsOpen, onOpenChange }) => {
                         ? '20px 20px 4px 20px'
                         : '20px 20px 20px 4px',
                       background: message.type === 'user'
-                        ? 'var(--primary-gradient)'
+                        ? 'var(--accent-purple)'
                         : 'var(--card-bg)',
                       color: message.type === 'user' ? 'white' : 'var(--text-primary)',
                       boxShadow: 'var(--card-shadow)',
@@ -716,7 +716,7 @@ const AccessibleChatbot = ({ isOpen: externalIsOpen, onOpenChange }) => {
                     width: '36px',
                     height: '36px',
                     borderRadius: '50%',
-                    background: 'var(--primary-gradient)',
+                    background: 'var(--accent-purple)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center'

@@ -155,7 +155,7 @@ export default function AccessibleMedia({
             Your browser does not support the video element.
           </video>
         ) : (
-          <div style={{ padding: '40px', background: 'linear-gradient(135deg, #1a1a2e, #16213e)' }}>
+          <div style={{ padding: '40px', background: '#1a1a2e' }}>
             <audio
               ref={mediaRef}
               src={src}
@@ -218,13 +218,7 @@ export default function AccessibleMedia({
           </div>
         )}
 
-        <div style={{
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          padding: '16px',
-          background: 'linear-gradient(transparent, rgba(0,0,0,0.9))',
+          background: 'rgba(0,0,0,0.85)',
           display: 'flex',
           alignItems: 'center',
           gap: '12px'

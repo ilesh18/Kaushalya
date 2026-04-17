@@ -34,7 +34,7 @@ export default function ProfileBuilder() {
       particleCount: 150,
       spread: 70,
       origin: { y: 0.6 },
-      colors: ['#7C3AED', '#0D9488', '#D97706', '#059669']
+      colors: ['#2563EB', '#0D9488', '#F59E0B', '#10B981']
     });
   };
 
@@ -202,7 +202,7 @@ export default function ProfileBuilder() {
                     <input id="profilePhoto" type="file" accept="image/*" aria-describedby="photoHelp" style={{ display: 'none' }} />
                     <label htmlFor="profilePhoto" style={{ 
                       display: 'inline-flex', alignItems: 'center', gap: '8px', 
-                      background: 'rgba(124, 58, 237, 0.05)', border: '2px dashed var(--accent-purple)', 
+                      background: 'rgba(37, 99, 235, 0.05)', border: '2px dashed var(--accent-purple)', 
                       padding: '24px 32px', borderRadius: '12px', cursor: 'pointer',
                       color: 'var(--accent-purple)', fontWeight: '600'
                     }}>
@@ -387,7 +387,7 @@ export default function ProfileBuilder() {
                   <input id="resumeUpload" type="file" accept=".pdf,.doc,.docx" aria-describedby="resumeHelp" style={{ display: 'none' }} />
                   <label htmlFor="resumeUpload" style={{ 
                       display: 'inline-flex', alignItems: 'center', gap: '8px', 
-                      background: 'rgba(124, 58, 237, 0.05)', border: '2px dashed var(--accent-purple)', 
+                      background: 'rgba(37, 99, 235, 0.05)', border: '2px dashed var(--accent-purple)', 
                       padding: '24px 32px', borderRadius: '12px', cursor: 'pointer',
                       color: 'var(--accent-purple)', fontWeight: '600'
                     }}>
