@@ -15,6 +15,7 @@ import KeyboardShortcutsHelp from './KeyboardShortcutsHelp';
 import VoiceControl from './VoiceControl';
 import InterviewPrepPage from './pages/InterviewPrepPage';
 import AboutUs from './pages/AboutUs';
+import ResumeBuilder from './pages/ResumeBuilder';
 import { useAuth } from './context/AuthContext';
 import faviconImg from './public/favicon.png';
 import './App.css';
@@ -249,6 +250,7 @@ const Header = () => {
           </AccessibleButton>
         )}
         <AccessibleButton variant="outline" className="desktop-only" onClick={() => navigate('/interview-prep')} aria-label="Practice Interviews">Interview Prep</AccessibleButton>
+        <AccessibleButton variant="outline" className="desktop-only" onClick={() => navigate('/resume-builder')} aria-label="AI Resume Builder">AI Resume</AccessibleButton>
         <AccessibleButton className="desktop-only" onClick={() => navigate('/employer')} aria-label="Post a new job listing">Post a Job</AccessibleButton>
         <button
           ref={menuButtonRef}
@@ -388,6 +390,21 @@ const Header = () => {
               }}
             >
               Interview Prep
+            </Link>
+            <Link
+              onClick={closeMobileMenu}
+              to="/resume-builder"
+              style={{
+                fontSize: '1.2rem',
+                padding: '16px 20px',
+                borderRadius: '12px',
+                background: 'var(--bg-secondary)',
+                minHeight: '56px',
+                display: 'flex',
+                alignItems: 'center'
+              }}
+            >
+              AI Resume Built
             </Link>
 
             <hr style={{ borderTop: '1px solid var(--border)', opacity: 0.5, margin: '8px 0' }} aria-hidden="true" />
@@ -647,6 +664,11 @@ const AnimatedRoutes = () => {
             <InterviewPrepPage />
           </motion.div>
         } />
+        <Route path="/resume-builder" element={
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.3 }}>
+            <ResumeBuilder />
+          </motion.div>
+        } />
         <Route path="/about" element={
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.3 }}>
             <AboutUs />
@@ -660,6 +682,7 @@ const AnimatedRoutes = () => {
 const AppLayout = () => {
   const location = useLocation();
   const isChatPage = location.pathname === '/chat';
+  const isResumeBuilderPage = location.pathname === '/resume-builder';
 
   return (
     <>
@@ -673,7 +696,7 @@ const AppLayout = () => {
           <AnimatedRoutes />
         </main>
 
-        {!isChatPage && <Footer />}
+        {!(isChatPage || isResumeBuilderPage) && <Footer />}
       </div>
 
       {/* Screen Reader - Text-to-Speech Feature */}
