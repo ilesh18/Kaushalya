@@ -160,3 +160,75 @@ If you haven't extracted a field yet, leave it empty or as an empty array. Do no
     return null;
   }
 };
+
+/**
+ * Fetch book recommendations from Groq
+ * @param {string} topic - The topic or course name
+ * @returns {Promise<Array>} Array of book recommendation objects
+ */
+export const getGroqBookRecommendations = async (topic) => {
+  if (!GROQ_API_KEY) {
+    console.warn('Groq API key not configured');
+    return [];
+  }
+
+  const BOOK_SYSTEM_INSTRUCTION = `You are a helpful education librarian. The user will provide a topic or course name.
+Your task is to recommend the 5 best books to read and prepare for this topic.
+You MUST respond with ONLY a valid JSON array of objects. Do not include any markdown formatting, do not include \`\`\`json, do not say anything else.
+Each object should have:
+"title": String,
+"author": String,
+"description": String (short 2-sentence summary),
+"level": String (Beginner, Intermediate, or Advanced),
+"whyToRead": String (1 sentence on why it's good for this topic).`;
+
+  try {
+    const response = await fetch(GROQ_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${GROQ_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [
+          { role: 'system', content: BOOK_SYSTEM_INSTRUCTION },
+          { role: 'user', content: `Topic: ${topic}` }
+        ],
+        temperature: 0.3, // Lower temperature for more structured output
+        max_tokens: 1500,
+        top_p: 1,
+        stream: false
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error('Groq API error:', response.status, data);
+      return [];
+    }
+
+    const responseText = data.choices?.[0]?.message?.content;
+
+    if (!responseText) {
+      return [];
+    }
+
+    let parsedBooks = [];
+    try {
+      // Removing any potential markdown just in case the AI ignored instructions
+      const cleanText = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
+      parsedBooks = JSON.parse(cleanText);
+    } catch (parseError) {
+      console.error('Failed to parse book JSON:', responseText);
+      return [];
+    }
+
+    return parsedBooks;
+  } catch (error) {
+    console.error('Error calling Groq API for books:', error);
+    return [];
+  }
+};
+

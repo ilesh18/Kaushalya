@@ -16,6 +16,7 @@ import VoiceControl from './VoiceControl';
 import InterviewPrepPage from './pages/InterviewPrepPage';
 import AboutUs from './pages/AboutUs';
 import ResumeBuilder from './pages/ResumeBuilder';
+import LibraryPage from './pages/LibraryPage';
 import { useAuth } from './context/AuthContext';
 import faviconImg from './public/favicon.png';
 import './App.css';
@@ -217,6 +218,10 @@ const Header = () => {
           </button>
           <span className="tooltip-text">Chat with Asha</span>
         </div>
+        <AccessibleButton variant="outline" className="desktop-only" onClick={() => navigate('/interview-prep')} aria-label="Practice Interviews">Interview Prep</AccessibleButton>
+        <AccessibleButton variant="outline" className="desktop-only" onClick={() => navigate('/resume-builder')} aria-label="AI Resume Builder">AI Resume</AccessibleButton>
+        <AccessibleButton variant="outline" className="desktop-only" onClick={() => navigate('/library')} aria-label="AI Library">Library</AccessibleButton>
+
         {isAuthenticated ? (
           <>
             <span className="desktop-only" style={{
@@ -249,8 +254,7 @@ const Header = () => {
             Sign In
           </AccessibleButton>
         )}
-        <AccessibleButton variant="outline" className="desktop-only" onClick={() => navigate('/interview-prep')} aria-label="Practice Interviews">Interview Prep</AccessibleButton>
-        <AccessibleButton variant="outline" className="desktop-only" onClick={() => navigate('/resume-builder')} aria-label="AI Resume Builder">AI Resume</AccessibleButton>
+
         <AccessibleButton className="desktop-only" onClick={() => navigate('/employer')} aria-label="Post a new job listing">Post a Job</AccessibleButton>
         <button
           ref={menuButtonRef}
@@ -405,6 +409,21 @@ const Header = () => {
               }}
             >
               AI Resume Built
+            </Link>
+            <Link
+              onClick={closeMobileMenu}
+              to="/library"
+              style={{
+                fontSize: '1.2rem',
+                padding: '16px 20px',
+                borderRadius: '12px',
+                background: 'var(--bg-secondary)',
+                minHeight: '56px',
+                display: 'flex',
+                alignItems: 'center'
+              }}
+            >
+              AI Books Library
             </Link>
 
             <hr style={{ borderTop: '1px solid var(--border)', opacity: 0.5, margin: '8px 0' }} aria-hidden="true" />
@@ -667,6 +686,11 @@ const AnimatedRoutes = () => {
         <Route path="/resume-builder" element={
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.3 }}>
             <ResumeBuilder />
+          </motion.div>
+        } />
+        <Route path="/library" element={
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.3 }}>
+            <LibraryPage />
           </motion.div>
         } />
         <Route path="/about" element={

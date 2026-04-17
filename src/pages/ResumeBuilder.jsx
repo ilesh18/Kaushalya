@@ -381,7 +381,7 @@ const ResumeBuilder = () => {
           {resumeData.skills && resumeData.skills.length > 0 && (
             <div style={{ marginBottom: '32px' }}>
               <h3 style={{ fontSize: '1.1rem', color: 'white', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Sparkles size={16} color="var(--accent-purple)" /> Skills
+                <NotebookText size={16} color="var(--accent-purple)" /> Skills
               </h3>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                 {resumeData.skills.map((skill, idx) => (
@@ -444,7 +444,7 @@ const ResumeBuilder = () => {
           {resumeData.projects && resumeData.projects.length > 0 && (
             <div style={{ marginTop: '32px' }}>
               <h3 style={{ fontSize: '1.1rem', color: 'white', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Sparkles size={16} color="var(--success)" /> Projects
+                <NotebookText size={16} color="var(--success)" /> Projects
               </h3>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '16px' }}>
                 {resumeData.projects.map((proj, idx) => (

@@ -569,15 +569,16 @@ a {
 }
 
 /* Section 2.2 - Spacing between interactive elements */
-button + button,
-a + a,
-input + input,
-.btn-group > * {
+button+button,
+a+a,
+input+input,
+.btn-group>* {
   margin-left: 8px;
 }
 
 /* Section 2.3 - Mobile form input heights */
 @media (max-width: 768px) {
+
   input[type="text"],
   input[type="email"],
   input[type="tel"],
@@ -589,7 +590,8 @@ input + input,
   textarea {
     min-height: 48px !important;
     padding: 12px 16px !important;
-    font-size: 16px !important; /* Prevents zoom on iOS */
+    font-size: 16px !important;
+    /* Prevents zoom on iOS */
   }
 
   button,
@@ -777,7 +779,7 @@ nav ul li:focus-within ul,
 }
 
 /* Section 7.1 - Large cursor mode */
-  html.large-cursor,
+html.large-cursor,
 html.large-cursor * {
   cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Ccircle cx='24' cy='24' r='20' fill='%232563EB' stroke='white' stroke-width='4'/%3E%3Ccircle cx='24' cy='24' r='4' fill='white'/%3E%3C/svg%3E") 24 24, auto !important;
 }
@@ -837,9 +839,12 @@ html.keyboard-highlight *:focus-visible {
 }
 
 @keyframes focusPulse {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 0 0 6px var(--accent-purple-glow);
   }
+
   50% {
     box-shadow: 0 0 0 12px var(--accent-purple-glow), 0 0 20px var(--accent-purple);
   }
@@ -857,6 +862,7 @@ html.reduce-motion *::after {
 
 /* Section 9.1 - Respect OS prefers-reduced-motion */
 @media (prefers-reduced-motion: reduce) {
+
   *,
   *::before,
   *::after {
@@ -982,15 +988,20 @@ html[dir="rtl"] {}
 
 /* Visual Alert System - Flashing notification for important events */
 @keyframes visualAlert {
-  0%, 100% { 
+
+  0%,
+  100% {
     box-shadow: 0 0 0 0 transparent;
     border-color: var(--border);
   }
-  25%, 75% { 
+
+  25%,
+  75% {
     box-shadow: 0 0 20px 5px var(--accent-purple);
     border-color: var(--accent-purple);
   }
-  50% { 
+
+  50% {
     box-shadow: 0 0 30px 10px var(--accent-amber);
     border-color: var(--accent-amber);
   }
@@ -1149,8 +1160,16 @@ html[dir="rtl"] {}
 }
 
 @keyframes typingBounce {
-  0%, 60%, 100% { transform: translateY(0); }
-  30% { transform: translateY(-6px); }
+
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+  }
+
+  30% {
+    transform: translateY(-6px);
+  }
 }
 
 /* Induction loop indicator */
