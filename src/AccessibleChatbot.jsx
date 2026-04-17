@@ -3,9 +3,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   MessageCircle, X, Send, Mic, MicOff, Volume2, VolumeX,
   Briefcase, FileText, HelpCircle, Accessibility, Sparkles,
-  ChevronDown, User, Bot, Loader2, RefreshCw, Image as ImageIcon
+  ChevronDown, User, Bot, Loader2, RefreshCw, Image as ImageIcon, Building2
 } from 'lucide-react';
 import { getAppContextImage, formatImageForDisplay } from './services/pexelsService';
+import { getGroqResponse, isGroqConfigured } from './services/groqService';
 
 // Chatbot responses database - job platform focused
 const chatResponses = {
@@ -117,6 +118,16 @@ const quickActions = [
     label: 'Accommodations',
     query: 'What accommodations are available?',
     icon: Accessibility
+  },
+  {
+    label: 'Top Companies',
+    query: 'Which companies are leading in disability inclusion?',
+    icon: Building2
+  },
+  {
+    label: 'App Guide',
+    query: 'How can I make my app more accessible for users?',
+    icon: Sparkles
   },
   {
     label: 'Need Help?',
@@ -278,13 +289,45 @@ const AccessibleChatbot = ({ isOpen: externalIsOpen, onOpenChange }) => {
     // Simulate typing delay + wait for image fetch
     await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 700));
 
-    const response = await getResponse(text);
+    let responseText;
+    let responseImage = null;
+
+    // Try Groq API first, fallback to rule-based responses
+    if (isGroqConfigured()) {
+      try {
+        const groqResponse = await getGroqResponse(text, messages.map(m => ({ role: m.type === 'user' ? 'user' : 'assistant', content: m.text })));
+        if (groqResponse) {
+          responseText = groqResponse;
+          // Optionally still fetch an image for the category detected
+          const category = detectCategory(text);
+          try {
+            const imageData = await getAppContextImage(category);
+            if (imageData) {
+              responseImage = formatImageForDisplay(imageData);
+            }
+          } catch (e) { console.error('Image fetch error:', e); }
+        } else {
+          const fallback = await getResponse(text);
+          responseText = fallback.text;
+          responseImage = fallback.image;
+        }
+      } catch (error) {
+        console.error('Groq error, using fallback:', error);
+        const fallback = await getResponse(text);
+        responseText = fallback.text;
+        responseImage = fallback.image;
+      }
+    } else {
+      const fallback = await getResponse(text);
+      responseText = fallback.text;
+      responseImage = fallback.image;
+    }
 
     const botResponse = {
       id: Date.now() + 1,
       type: 'bot',
-      text: response.text,
-      image: response.image,
+      text: responseText,
+      image: responseImage,
       timestamp: new Date()
     };
 

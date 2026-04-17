@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { getGeminiResponse, isGeminiConfigured } from '../services/geminiService';
+import { getGroqResponse, isGroqConfigured } from '../services/groqService';
 
 // Chatbot responses database - job platform focused
 const chatResponses = {
@@ -97,9 +98,10 @@ const getResponse = (userMessage) => {
 const suggestedQuestions = [
   "How do I find remote jobs?",
   "Is my disability information private?",
-  "What companies are hiring?",
-  "Do you support sign language?",
-  "Are there text-based interviews?"
+  "Which companies are top for accessibility?",
+  "How can apps be made more inclusive?",
+  "List tech firms with great accommodations",
+  "Do you support sign language?"
 ];
 
 const ChatbotPage = () => {
@@ -356,20 +358,32 @@ const ChatbotPage = () => {
 
     let responseText;
 
-    // Try Gemini API first, fallback to local responses
-    if (isGeminiConfigured()) {
+    // 1. Try Groq API first (Highest priority for this update)
+    if (isGroqConfigured()) {
+      try {
+        const groqResponse = await getGroqResponse(text, messages.map(m => ({ role: m.type === 'user' ? 'user' : 'assistant', content: m.text })));
+        if (groqResponse) {
+          responseText = groqResponse;
+        }
+      } catch (error) {
+        console.error('Groq error, trying Gemini:', error);
+      }
+    }
+
+    // 2. Try Gemini API second
+    if (!responseText && isGeminiConfigured()) {
       try {
         const geminiResponse = await getGeminiResponse(text);
         if (geminiResponse) {
           responseText = geminiResponse;
-        } else {
-          responseText = getResponse(text);
         }
       } catch (error) {
         console.error('Gemini error, using fallback:', error);
-        responseText = getResponse(text);
       }
-    } else {
+    }
+
+    // 3. Fallback to local rule-based responses
+    if (!responseText) {
       await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 700));
       responseText = getResponse(text);
     }
