@@ -1,6 +1,6 @@
 // Authentication Context - Provides auth state across the app
 import { createContext, useContext, useState, useEffect } from 'react';
-import { onAuthChange, getCurrentUserProfile, logoutUser } from '../firebase/auth';
+import { onAuthChange, getCurrentUserProfileRTDB, logoutUser } from '../firebase/auth';
 
 const AuthContext = createContext();
 
@@ -24,14 +24,9 @@ export const AuthProvider = ({ children }) => {
       if (firebaseUser && firebaseUser.emailVerified) {
         setUser(firebaseUser);
 
-        // Try to fetch profile (check both candidate and employer)
-        let profile = await getCurrentUserProfile('candidate');
-        let type = 'candidate';
-
-        if (!profile) {
-          profile = await getCurrentUserProfile('employer');
-          type = 'employer';
-        }
+        // Fetch profile from Realtime Database
+        let profile = await getCurrentUserProfileRTDB();
+        let type = profile?.userType || 'candidate';
 
         setUserProfile(profile);
         setUserType(profile ? type : null);
@@ -55,9 +50,12 @@ export const AuthProvider = ({ children }) => {
   };
 
   const refreshProfile = async () => {
-    if (user && userType) {
-      const profile = await getCurrentUserProfile(userType);
+    if (user) {
+      const profile = await getCurrentUserProfileRTDB();
       setUserProfile(profile);
+      if (profile?.userType) {
+        setUserType(profile.userType);
+      }
     }
   };
 

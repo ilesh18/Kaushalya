@@ -1,26 +1,30 @@
-// Candidate-related Firestore operations
-import { 
-  collection, 
-  doc, 
-  setDoc, 
-  getDoc, 
-  updateDoc,
-  query,
-  where,
-  getDocs
-} from 'firebase/firestore';
-import { db } from './config';
+// Candidate-related Realtime Database operations
+import {
+  ref,
+  get,
+  set,
+  update,
+  serverTimestamp
+} from 'firebase/database';
+import { rtdb } from './config';
 
-const COLLECTION = 'candidates';
+const COLLECTION = 'users';
 
 // Create/Update candidate profile
 export const saveCandidateProfile = async (uid, profileData) => {
   try {
-    const docRef = doc(db, COLLECTION, uid);
-    await setDoc(docRef, {
+    const userRef = ref(rtdb, `${COLLECTION}/${uid}`);
+    
+    // First get existing to preserve stuff
+    const snapshot = await get(userRef);
+    const existing = snapshot.exists() ? snapshot.val() : {};
+
+    await update(userRef, {
+      ...existing,
       ...profileData,
-      updatedAt: new Date().toISOString()
-    }, { merge: true });
+      userType: 'candidate',
+      updatedAt: serverTimestamp()
+    });
     return { success: true };
   } catch (error) {
     return { success: false, error: error.message };
@@ -30,11 +34,11 @@ export const saveCandidateProfile = async (uid, profileData) => {
 // Get candidate profile by ID
 export const getCandidateProfile = async (uid) => {
   try {
-    const docRef = doc(db, COLLECTION, uid);
-    const docSnap = await getDoc(docRef);
+    const userRef = ref(rtdb, `${COLLECTION}/${uid}`);
+    const snapshot = await get(userRef);
     
-    if (docSnap.exists()) {
-      return { success: true, data: { ...docSnap.data(), id: docSnap.id } };
+    if (snapshot.exists()) {
+      return { success: true, data: { ...snapshot.val(), id: uid } };
     }
     return { success: false, error: 'Profile not found' };
   } catch (error) {
@@ -45,13 +49,18 @@ export const getCandidateProfile = async (uid) => {
 // Get all candidates (for employers)
 export const getAllCandidates = async () => {
   try {
-    const q = query(collection(db, COLLECTION));
-    const querySnapshot = await getDocs(q);
+    const usersRef = ref(rtdb, COLLECTION);
+    const snapshot = await get(usersRef);
     const candidates = [];
     
-    querySnapshot.forEach((doc) => {
-      candidates.push({ ...doc.data(), id: doc.id });
-    });
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      Object.keys(data).forEach(uid => {
+        if (data[uid].userType === 'candidate') {
+          candidates.push({ ...data[uid], id: uid });
+        }
+      });
+    }
     
     return { success: true, data: candidates };
   } catch (error) {
@@ -62,16 +71,23 @@ export const getAllCandidates = async () => {
 // Search candidates by skills
 export const searchCandidatesBySkills = async (skills) => {
   try {
-    const q = query(
-      collection(db, COLLECTION),
-      where('skills', 'array-contains-any', skills)
-    );
-    const querySnapshot = await getDocs(q);
+    const usersRef = ref(rtdb, COLLECTION);
+    const snapshot = await get(usersRef);
     const candidates = [];
     
-    querySnapshot.forEach((doc) => {
-      candidates.push({ ...doc.data(), id: doc.id });
-    });
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      Object.keys(data).forEach(uid => {
+        const user = data[uid];
+        if (user.userType === 'candidate' && user.skills && Array.isArray(user.skills)) {
+          // Check if user has any of the requested skills
+          const hasSkill = skills.some(skill => user.skills.includes(skill));
+          if (hasSkill) {
+            candidates.push({ ...user, id: uid });
+          }
+        }
+      });
+    }
     
     return { success: true, data: candidates };
   } catch (error) {

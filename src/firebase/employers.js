@@ -1,24 +1,30 @@
-// Employer-related Firestore operations
-import { 
-  collection, 
-  doc, 
-  setDoc, 
-  getDoc, 
-  updateDoc,
-  getDocs
-} from 'firebase/firestore';
-import { db } from './config';
+// Employer-related Realtime Database operations
+import {
+  ref,
+  get,
+  set,
+  update,
+  serverTimestamp
+} from 'firebase/database';
+import { rtdb } from './config';
 
-const COLLECTION = 'employers';
+const COLLECTION = 'users';
 
 // Create/Update employer profile
 export const saveEmployerProfile = async (uid, profileData) => {
   try {
-    const docRef = doc(db, COLLECTION, uid);
-    await setDoc(docRef, {
+    const userRef = ref(rtdb, `${COLLECTION}/${uid}`);
+    
+    // First get existing to preserve stuff
+    const snapshot = await get(userRef);
+    const existing = snapshot.exists() ? snapshot.val() : {};
+
+    await update(userRef, {
+      ...existing,
       ...profileData,
-      updatedAt: new Date().toISOString()
-    }, { merge: true });
+      userType: 'employer',
+      updatedAt: serverTimestamp()
+    });
     return { success: true };
   } catch (error) {
     return { success: false, error: error.message };
@@ -28,11 +34,11 @@ export const saveEmployerProfile = async (uid, profileData) => {
 // Get employer profile by ID
 export const getEmployerProfile = async (uid) => {
   try {
-    const docRef = doc(db, COLLECTION, uid);
-    const docSnap = await getDoc(docRef);
+    const userRef = ref(rtdb, `${COLLECTION}/${uid}`);
+    const snapshot = await get(userRef);
     
-    if (docSnap.exists()) {
-      return { success: true, data: { ...docSnap.data(), id: docSnap.id } };
+    if (snapshot.exists()) {
+      return { success: true, data: { ...snapshot.val(), id: uid } };
     }
     return { success: false, error: 'Employer not found' };
   } catch (error) {
@@ -43,12 +49,18 @@ export const getEmployerProfile = async (uid) => {
 // Get all employers
 export const getAllEmployers = async () => {
   try {
-    const querySnapshot = await getDocs(collection(db, COLLECTION));
+    const usersRef = ref(rtdb, COLLECTION);
+    const snapshot = await get(usersRef);
     const employers = [];
     
-    querySnapshot.forEach((doc) => {
-      employers.push({ ...doc.data(), id: doc.id });
-    });
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      Object.keys(data).forEach(uid => {
+        if (data[uid].userType === 'employer') {
+          employers.push({ ...data[uid], id: uid });
+        }
+      });
+    }
     
     return { success: true, data: employers };
   } catch (error) {

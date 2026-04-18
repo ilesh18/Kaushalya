@@ -11,9 +11,8 @@ import {
   sendEmailVerification,
   reload
 } from 'firebase/auth';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { ref, set, get, update } from 'firebase/database';
-import { auth, db, rtdb } from './config';
+import { auth, rtdb } from './config';
 
 const trimTrailingSlash = (value = '') => value.replace(/\/+$/, '');
 
@@ -123,19 +122,7 @@ export const verifyEmailOTP = async (userType = 'candidate') => {
           // Update display name
           await updateProfile(user, { displayName: userData.name });
 
-          // Create user document in Firestore
-          const userDocRef = doc(db, userType === 'candidate' ? 'candidates' : 'employers', user.uid);
-          await setDoc(userDocRef, {
-            ...userData,
-            email,
-            userType,
-            verified: true,
-            createdAt: new Date().toISOString(),
-            uid: user.uid,
-            pending: false
-          });
-
-          // Save to Realtime Database
+          // Create user document in Realtime Database as the sole authority
           const rtdbRef = ref(rtdb, `users/${user.uid}`);
           await set(rtdbRef, {
             ...userData,
@@ -210,17 +197,7 @@ export const registerUser = async (email, password, userData, userType = 'candid
       handleCodeInApp: false
     });
 
-    // Store user data in Firestore (unverified flag)
-    const userDocRef = doc(db, userType === 'candidate' ? 'candidates' : 'employers', user.uid);
-    await setDoc(userDocRef, {
-      ...userData,
-      email,
-      userType,
-      createdAt: new Date().toISOString(),
-      uid: user.uid,
-      emailVerified: false
-    });
-
+    // Store user data in Realtime Database (unverified flag)
     const rtdbRef = ref(rtdb, `users/${user.uid}`);
     await set(rtdbRef, {
       ...userData,
@@ -283,25 +260,6 @@ export const logoutUser = async () => {
   }
 };
 
-// Get current user profile data from Firestore
-export const getCurrentUserProfile = async (userType = 'candidate') => {
-  const user = auth.currentUser;
-  if (!user) return null;
-
-  try {
-    const docRef = doc(db, userType === 'candidate' ? 'candidates' : 'employers', user.uid);
-    const docSnap = await getDoc(docRef);
-    
-    if (docSnap.exists()) {
-      return { ...docSnap.data(), id: docSnap.id };
-    }
-    return null;
-  } catch (error) {
-    console.error('Error fetching profile:', error);
-    return null;
-  }
-};
-
 // Get current user profile data from Realtime Database
 export const getCurrentUserProfileRTDB = async () => {
   const user = auth.currentUser;
@@ -321,19 +279,12 @@ export const getCurrentUserProfileRTDB = async () => {
   }
 };
 
-// Update user data in both Firestore and Realtime Database
+// Update user data in Realtime Database
 export const updateUserProfile = async (userData, userType = 'candidate') => {
   const user = auth.currentUser;
   if (!user) return { success: false, error: 'No user logged in' };
 
   try {
-    // Update in Firestore
-    const userDocRef = doc(db, userType === 'candidate' ? 'candidates' : 'employers', user.uid);
-    await setDoc(userDocRef, {
-      ...userData,
-      updatedAt: new Date().toISOString()
-    }, { merge: true });
-
     // Update in Realtime Database
     const rtdbRef = ref(rtdb, `users/${user.uid}`);
     await update(rtdbRef, {
