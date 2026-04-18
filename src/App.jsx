@@ -17,6 +17,7 @@ import InterviewPrepPage from './pages/InterviewPrepPage';
 import AboutUs from './pages/AboutUs';
 import ResumeBuilder from './pages/ResumeBuilder';
 import LibraryPage from './pages/LibraryPage';
+import UserProfile from './pages/UserProfile';
 import { useAuth } from './context/AuthContext';
 import faviconImg from './public/favicon.png';
 import './App.css';
@@ -229,8 +230,14 @@ const Header = () => {
               fontWeight: '500',
               display: 'flex',
               alignItems: 'center',
-              gap: '8px'
-            }}>
+              gap: '8px',
+              cursor: 'pointer'
+            }}
+              onClick={() => navigate('/profile')}
+              role="button"
+              tabIndex={0}
+              onKeyDown={e => e.key === 'Enter' && navigate('/profile')}
+            >
               Hi, {userProfile?.name || user?.displayName || 'User'}
             </span>
             <AccessibleButton
@@ -336,7 +343,7 @@ const Header = () => {
             </Link>
             <Link
               onClick={closeMobileMenu}
-              to="/profile/create"
+              to="/profile"
               style={{
                 fontSize: '1.2rem',
                 padding: '16px 20px',
@@ -696,6 +703,11 @@ const AnimatedRoutes = () => {
         <Route path="/about" element={
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.3 }}>
             <AboutUs />
+          </motion.div>
+        } />
+        <Route path="/profile" element={
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.3 }}>
+            <UserProfile />
           </motion.div>
         } />
       </Routes>

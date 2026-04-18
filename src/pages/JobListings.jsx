@@ -1,238 +1,276 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Bookmark, Search, Filter, Briefcase, MapPin } from 'lucide-react';
+import { Bookmark, Search, Briefcase, MapPin, Loader2, Filter, X } from 'lucide-react';
 import { AccessibleButton } from '../App';
-
-const MOCK_JOBS = [
-  { id: 1, title: 'Senior Frontend Engineer', company: 'TechCorp India', logo: 'T', color: '#6B46C1', location: 'Bangalore', mode: 'Remote', salary: '₹18L - ₹24L', match: 96, tags: ['Screen Reader ✓', 'Remote ✓', 'Flexible Hours ✓'], deafFriendly: true, signLanguage: true, captioning: true },
-  { id: 2, title: 'Accessibility Consultant', company: 'Global Solutions', logo: 'G', color: '#0D9488', location: 'Pune', mode: 'Hybrid', salary: '₹12L - ₹18L', match: 92, tags: ['Wheelchair Access ✓', 'Sign Language ✓'], deafFriendly: true, signLanguage: true, captioning: false, inductionLoop: true },
-  { id: 3, title: 'Data Analyst (Entry Level)', company: 'Finserve Tech', logo: 'F', color: '#D97706', location: 'Mumbai', mode: 'Remote', salary: '₹6L - ₹9L', match: 88, tags: ['Remote ✓', 'Screen Reader ✓', 'Quiet Workspace ✓'], deafFriendly: true, textInterview: true },
-  { id: 4, title: 'Product Manager', company: 'InnovateX', logo: 'I', color: '#DC2626', location: 'Delhi', mode: 'Onsite', salary: '₹20L - ₹30L', match: 85, tags: ['Wheelchair Access ✓', 'Flexible Hours ✓'], deafFriendly: false, visualAlarms: true }
-];
+import { getAllJobs } from '../firebase/jobs';
 
 export default function JobListings() {
-  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
-  const [savedJobs, setSavedJobs] = useState(new Set());
+  const [jobs, setJobs] = useState([]);
+  const [filtered, setFiltered] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [saved, setSaved] = useState(new Set());
+  const [search, setSearch] = useState('');
+  const [modeFilter, setModeFilter] = useState('All');
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    getAllJobs().then((r) => {
+      if (r.success) { setJobs(r.data); setFiltered(r.data); }
+      else setError(r.error || 'Failed to load jobs.');
+      setLoading(false);
+    });
+  }, []);
+
+  useEffect(() => {
+    let res = [...jobs];
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      res = res.filter(j =>
+        (j.title || '').toLowerCase().includes(q) ||
+        (j.company || '').toLowerCase().includes(q) ||
+        (j.location || '').toLowerCase().includes(q)
+      );
+    }
+    if (modeFilter !== 'All') {
+      res = res.filter(j => (j.jobType || '').toLowerCase() === modeFilter.toLowerCase());
+    }
+    setFiltered(res);
+  }, [search, modeFilter, jobs]);
 
   const toggleSave = (id) => {
-    const next = new Set(savedJobs);
-    if (next.has(id)) next.delete(id);
-    else next.add(id);
-    setSavedJobs(next);
+    const n = new Set(saved);
+    n.has(id) ? n.delete(id) : n.add(id);
+    setSaved(n);
   };
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
+  const logoColor = (name) => {
+    const c = ['#6B46C1','#0D9488','#D97706','#DC2626','#2563EB','#059669'];
+    let h = 0;
+    for (let i = 0; i < (name||'').length; i++) h = (name||'').charCodeAt(i) + ((h << 5) - h);
+    return c[Math.abs(h) % c.length];
   };
-  
-  const itemVariants = {
+
+  const timeAgo = (ts) => {
+    if (!ts) return '';
+    const d = ts.toDate ? ts.toDate() : new Date(ts);
+    const days = Math.floor((Date.now() - d) / 86400000);
+    if (days === 0) return 'Today';
+    if (days === 1) return '1 day ago';
+    if (days < 30) return `${days} days ago`;
+    return `${Math.floor(days/30)} months ago`;
+  };
+
+  const cardVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { type: 'spring' } }
+    visible: (i) => ({ opacity: 1, y: 0, transition: { delay: i * 0.06, type: 'spring' } })
   };
 
-  return (
-    <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '40px 24px', display: 'flex', gap: '32px' }}>
-      
-      {/* Skip section link for switch users */}
-      <a href="#job-results" className="skip-section-link">Skip to job results</a>
-      
-      {/* Mobile Filter Button */}
-      <div className="mobile-only" style={{ position: 'fixed', bottom: '24px', right: '24px', zIndex: 50 }}>
-        <AccessibleButton 
-          onClick={() => setMobileFilterOpen(!mobileFilterOpen)} 
-          style={{ borderRadius: '50%', width: '60px', height: '60px', padding: 0 }}
-          aria-label="Open job search filters"
-          aria-expanded={mobileFilterOpen}
-        >
-          <Filter size={24} aria-hidden="true" />
-        </AccessibleButton>
+  const Sidebar = () => (
+    <aside style={{
+      width: '260px', flexShrink: 0, padding: '24px', borderRadius: '16px',
+      background: 'var(--bg-secondary)', border: '1px solid var(--border)',
+      height: 'fit-content', position: 'sticky', top: '90px'
+    }}>
+      <h2 style={{ fontSize: '1.1rem', marginBottom: '20px', fontWeight: '700' }}>Filters</h2>
+
+      {/* Search */}
+      <div style={{ position: 'relative', marginBottom: '24px' }}>
+        <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+        <input
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Search roles, companies…"
+          style={{ paddingLeft: '36px', width: '100%', boxSizing: 'border-box' }}
+          aria-label="Search jobs"
+        />
       </div>
 
-      {/* Sidebar Filters */}
-      <aside className={`glass ${mobileFilterOpen ? 'mobile-filter-open' : 'desktop-only'}`} style={{ 
-        width: '280px', flexShrink: 0,
-        padding: '24px', borderRadius: '16px', height: 'fit-content', position: 'sticky', top: '100px',
-        ...(mobileFilterOpen ? { position: 'fixed', top: 0, left: 0, width: '100%', height: '100vh', zIndex: 100, borderRadius: 0 } : {})
-      }} aria-label="Job search filters">
-        
-        {mobileFilterOpen && (
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px' }}>
-            <h2 style={{ margin: 0 }}>Filters</h2>
-            <AccessibleButton variant="ghost" onClick={() => setMobileFilterOpen(false)}>Close</AccessibleButton>
+      {/* Work Mode */}
+      <div>
+        <p style={{ fontSize: '0.85rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)', marginBottom: '12px' }}>Work Mode</p>
+        {['All', 'Remote', 'Hybrid', 'Onsite'].map(m => (
+          <label key={m} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 0', cursor: 'pointer', fontWeight: modeFilter === m ? '700' : '400', color: modeFilter === m ? 'var(--accent-purple)' : 'var(--text-primary)' }}>
+            <input type="radio" name="mode" checked={modeFilter === m} onChange={() => setModeFilter(m)} style={{ accentColor: 'var(--accent-purple)' }} />
+            {m}
+          </label>
+        ))}
+      </div>
+
+      {(search || modeFilter !== 'All') && (
+        <button onClick={() => { setSearch(''); setModeFilter('All'); }} style={{ marginTop: '20px', width: '100%', padding: '10px', borderRadius: '10px', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '0.9rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+          <X size={14} /> Clear Filters
+        </button>
+      )}
+    </aside>
+  );
+
+  return (
+    <div style={{ maxWidth: '1300px', margin: '0 auto', padding: '40px 24px' }}>
+      <div style={{ display: 'flex', gap: '32px', alignItems: 'flex-start' }}>
+
+        {/* Desktop Sidebar */}
+        <div className="desktop-only">
+          <Sidebar />
+        </div>
+
+        {/* Mobile filter button */}
+        <button
+          className="mobile-only"
+          onClick={() => setMobileOpen(true)}
+          style={{
+            position: 'fixed', bottom: '90px', right: '20px', zIndex: 50,
+            width: '52px', height: '52px', borderRadius: '50%',
+            background: 'var(--accent-purple)', border: 'none', color: 'white',
+            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: '0 4px 20px rgba(139,92,246,0.4)'
+          }}
+        >
+          <Filter size={22} />
+        </button>
+
+        {/* Mobile Sidebar Drawer */}
+        {mobileOpen && (
+          <div className="mobile-only" style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.4)' }} onClick={() => setMobileOpen(false)}>
+            <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '280px', background: 'var(--bg-primary)', padding: '24px', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px' }}>
+                <h2 style={{ margin: 0 }}>Filters</h2>
+                <button onClick={() => setMobileOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-primary)', padding: '4px' }}><X size={22} /></button>
+              </div>
+              <Sidebar />
+            </div>
           </div>
         )}
 
-        <fieldset style={{ marginBottom: '32px' }}>
-          <legend className="sr-only">Search</legend>
-          <div style={{ position: 'relative' }}>
-            <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-            <input type="text" placeholder="Search roles..." aria-label="Search job titles or companies" style={{ paddingLeft: '40px' }} />
+        {/* Main */}
+        <main style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
+            <h1 style={{ fontSize: '1.8rem', margin: 0 }}>
+              {loading ? 'Loading jobs…' : `${filtered.length} job${filtered.length !== 1 ? 's' : ''} found`}
+            </h1>
           </div>
-        </fieldset>
 
-        <fieldset style={{ marginBottom: '32px' }}>
-          <legend style={{ marginBottom: '16px', fontSize: '1.1rem' }}>Accessibility Features</legend>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {['Screen reader compatible', 'Remote work available', 'Flexible hours', 'Wheelchair accessible', 'Sign language support', 'Braille materials'].map(f => (
-              <label key={f} style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: 0, fontWeight: '500', cursor: 'pointer' }}>
-                <input type="checkbox" /> {f}
-              </label>
-            ))}
-          </div>
-        </fieldset>
+          {loading ? (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 0', color: 'var(--text-muted)', gap: '16px' }}>
+              <Loader2 size={40} style={{ animation: 'spin 1s linear infinite' }} />
+              <p style={{ fontSize: '1rem' }}>Loading jobs from database…</p>
+              <style>{`@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
+            </div>
+          ) : error ? (
+            <div style={{ padding: '40px', borderRadius: '16px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', color: '#ef4444', textAlign: 'center' }}>
+              <p style={{ fontWeight: '600', marginBottom: '8px' }}>Error loading jobs</p>
+              <p style={{ fontSize: '0.9rem', opacity: 0.8 }}>{error}</p>
+            </div>
+          ) : filtered.length === 0 ? (
+            <div style={{ padding: '60px 40px', borderRadius: '20px', background: 'var(--bg-secondary)', border: '1px dashed var(--border)', textAlign: 'center' }}>
+              <p style={{ fontSize: '1.3rem', fontWeight: '600', marginBottom: '8px' }}>No jobs found</p>
+              <p style={{ color: 'var(--text-muted)', marginBottom: '24px' }}>
+                {jobs.length === 0 ? 'No jobs posted yet. Be the first to post one!' : 'Try different search terms or filters.'}
+              </p>
+              {(search || modeFilter !== 'All') && (
+                <AccessibleButton variant="outline" onClick={() => { setSearch(''); setModeFilter('All'); }}>Clear Filters</AccessibleButton>
+              )}
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              {filtered.map((job, i) => {
+                const isSaved = saved.has(job.id);
+                const color = logoColor(job.company);
+                const logo = (job.company || 'J').charAt(0).toUpperCase();
+                const mode = (job.jobType || 'remote');
+                const modeLabel = mode.charAt(0).toUpperCase() + mode.slice(1);
+                const tags = (job.accessibilityFeatures || []).slice(0, 3);
 
-        {/* NEW: Deaf/HoH Specific Filters */}
-        <fieldset style={{ marginBottom: '32px', background: 'rgba(37, 99, 235, 0.05)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(37, 99, 235, 0.2)' }}>
-          <legend style={{ marginBottom: '16px', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span role="img" aria-label="Deaf/HoH">🤟</span> Deaf/HoH Friendly
-          </legend>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {[
-              { label: 'Sign language interpreters', value: 'sign-language' },
-              { label: 'Live captioning (CART)', value: 'captioning' },
-              { label: 'Induction/hearing loop', value: 'induction-loop' },
-              { label: 'Visual fire alarms', value: 'visual-alarms' },
-              { label: 'Text-based interviews', value: 'text-interview' },
-              { label: 'No phone calls required', value: 'no-phone' }
-            ].map(f => (
-              <label key={f.value} style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: 0, fontWeight: '500', cursor: 'pointer' }}>
-                <input type="checkbox" name="deafFilters" value={f.value} /> {f.label}
-              </label>
-            ))}
-          </div>
-        </fieldset>
+                return (
+                  <motion.article
+                    key={job.id}
+                    custom={i}
+                    variants={cardVariants}
+                    initial="hidden"
+                    animate="visible"
+                    style={{
+                      background: 'var(--bg-secondary)', border: '1px solid var(--border)',
+                      borderRadius: '18px', padding: '24px', display: 'flex', gap: '20px',
+                      flexWrap: 'wrap', transition: 'box-shadow 0.2s, border-color 0.2s'
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.1)'; e.currentTarget.style.borderColor = 'var(--accent-purple)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.boxShadow = ''; e.currentTarget.style.borderColor = 'var(--border)'; }}
+                  >
+                    {/* Logo */}
+                    <div style={{
+                      width: '52px', height: '52px', borderRadius: '12px', flexShrink: 0,
+                      background: `${color}20`, color, display: 'flex', alignItems: 'center',
+                      justifyContent: 'center', fontWeight: '800', fontSize: '1.4rem'
+                    }}>{logo}</div>
 
-        <fieldset style={{ marginBottom: '32px' }}>
-          <legend style={{ marginBottom: '16px', fontSize: '1.1rem' }}>Work Mode</legend>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {['All', 'Remote', 'Hybrid', 'Onsite'].map(m => (
-              <label key={m} style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: 0, fontWeight: '500', cursor: 'pointer' }}>
-                <input type="radio" name="workModeFilter" defaultChecked={m === 'All'} /> {m}
-              </label>
-            ))}
-          </div>
-        </fieldset>
-
-        <fieldset style={{ marginBottom: '32px' }}>
-          <legend style={{ marginBottom: '16px', fontSize: '1.1rem' }}>Salary Minimum (₹/yr)</legend>
-          <input type="range" min="0" max="5000000" step="100000" aria-label="Salary minimum" style={{ width: '100%', accentColor: 'var(--accent-purple)' }} />
-        </fieldset>
-
-        <AccessibleButton style={{ width: '100%' }}>Apply Filters</AccessibleButton>
-      </aside>
-
-      {/* Main Content */}
-      <main style={{ flex: 1, minWidth: 0 }} id="job-results">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '24px' }}>
-          <h1 aria-live="polite" style={{ fontSize: '2rem', margin: 0 }}>
-            {MOCK_JOBS.length} accessible jobs found
-          </h1>
-          <div className="desktop-only">
-            <label htmlFor="sortJobs" className="sr-only">Sort Jobs</label>
-            <select id="sortJobs" style={{ width: 'auto', minHeight: '44px' }}>
-              <option>Sort by: Match Score</option>
-              <option>Sort by: Newest</option>
-              <option>Sort by: Salary (High-Low)</option>
-            </select>
-          </div>
-        </div>
-
-        <motion.div variants={containerVariants} initial="hidden" animate="visible" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          {MOCK_JOBS.map(job => {
-            const isSaved = savedJobs.has(job.id);
-            return (
-              <motion.article variants={itemVariants} key={job.id} className="card" style={{ padding: '24px', display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
-                {/* Logo & Info */}
-                <div style={{ flex: '1 1 300px', display: 'flex', gap: '16px' }}>
-                  <div style={{
-                    width: '56px', height: '56px', borderRadius: '12px', background: `${job.color}20`, color: job.color,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800', fontSize: '1.5rem', flexShrink: 0
-                  }}>
-                    {job.logo}
-                  </div>
-                  <div>
-                    <h2 style={{ fontSize: '1.25rem', marginBottom: '4px' }}>
-                      <Link to={`/jobs/${job.id}`} style={{ color: 'var(--text-primary)' }}>{job.title}</Link>
-                    </h2>
-                    <div style={{ color: 'var(--text-muted)', fontWeight: '500', marginBottom: '12px', display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><Briefcase size={16} aria-hidden="true" />{job.company}</span>
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><MapPin size={16} aria-hidden="true" />{job.location} ({job.mode})</span>
-                    </div>
-
-                    {/* Deaf/HoH Friendly Badges */}
-                    {(job.deafFriendly || job.signLanguage || job.captioning || job.textInterview) && (
-                      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '12px' }}>
-                        {job.deafFriendly && (
-                          <span className="deaf-friendly-badge" style={{ fontSize: '0.75rem', padding: '4px 10px' }} title="Deaf/HoH Friendly Workplace">
-                            <span role="img" aria-hidden="true">🤟</span> Deaf Friendly
-                          </span>
-                        )}
-                        {job.signLanguage && (
-                          <span className="sign-language-badge" style={{ fontSize: '0.75rem', padding: '4px 10px' }} title="Sign Language Interpreters Available">
-                            BSL/ISL Support
-                          </span>
-                        )}
-                        {job.captioning && (
-                          <span className="cart-badge" style={{ fontSize: '0.75rem', padding: '4px 10px' }} title="Real-time Captioning Available">
-                            CART
-                          </span>
-                        )}
-                        {job.textInterview && (
-                          <span className="text-interview-badge" style={{ fontSize: '0.75rem', padding: '4px 10px' }} title="Text-based Interview Option">
-                            Text Interview ✓
-                          </span>
-                        )}
-                        {job.inductionLoop && (
-                          <span className="induction-loop-badge" style={{ fontSize: '0.75rem', padding: '4px 10px' }} title="Hearing Loop System Available">
-                            Loop System
-                          </span>
-                        )}
+                    {/* Info */}
+                    <div style={{ flex: 1, minWidth: '200px' }}>
+                      <h2 style={{ fontSize: '1.1rem', marginBottom: '4px' }}>
+                        <Link to={`/jobs/${job.id}`} style={{ color: 'var(--text-primary)', textDecoration: 'none' }}>
+                          {job.title}
+                        </Link>
+                      </h2>
+                      <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', color: 'var(--text-muted)', fontSize: '0.88rem', marginBottom: '12px' }}>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Briefcase size={13} />{job.company}</span>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><MapPin size={13} />{job.location}</span>
+                        <span style={{
+                          padding: '2px 10px', borderRadius: '10px', fontSize: '0.78rem', fontWeight: '600',
+                          background: mode === 'remote' ? 'rgba(5,150,105,0.1)' : mode === 'hybrid' ? 'rgba(245,158,11,0.1)' : 'rgba(99,102,241,0.1)',
+                          color: mode === 'remote' ? 'var(--success)' : mode === 'hybrid' ? 'var(--accent-amber)' : 'var(--accent-purple)'
+                        }}>{modeLabel}</span>
+                        {job.salary && <span style={{ fontWeight: '600', color: 'var(--text-primary)' }}>💰 {job.salary}</span>}
                       </div>
-                    )}
 
-                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                      {job.tags.map(t => (
-                        <span key={t} style={{
-                          background: 'rgba(5, 150, 105, 0.1)', color: 'var(--success)', padding: '4px 12px', borderRadius: '12px', fontSize: '0.8rem', fontWeight: '700'
-                        }}>{t}</span>
-                      ))}
+                      {/* Badges */}
+                      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                        {job.deafFriendly && <span style={{ padding: '3px 10px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: '600', background: 'rgba(37,99,235,0.1)', color: '#2563EB' }}>🤟 Deaf Friendly</span>}
+                        {tags.map(t => (
+                          <span key={t} style={{ padding: '3px 10px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: '600', background: 'rgba(5,150,105,0.1)', color: 'var(--success)', textTransform: 'capitalize' }}>
+                            ✓ {t.replace(/_/g, ' ')}
+                          </span>
+                        ))}
+                        {job.createdAt && <span style={{ padding: '3px 10px', borderRadius: '12px', fontSize: '0.75rem', color: 'var(--text-muted)', background: 'var(--bg-primary)' }}>{timeAgo(job.createdAt)}</span>}
+                      </div>
                     </div>
-                  </div>
-                </div>
 
-                {/* Score & Actions */}
-                <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'space-between', gap: '16px' }}>
-                  <div style={{ textAlign: 'center' }}>
-                    <div style={{ 
-                      fontSize: '2rem', fontWeight: '800', color: 'var(--accent-purple)', lineHeight: '1'
-                    }}>{job.match}%</div>
-                    <div style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Match Score</div>
-                  </div>
-                  <div style={{ display: 'flex', gap: '12px' }}>
-                    <AccessibleButton 
-                      variant={isSaved ? "primary" : "outline"} 
-                      onClick={() => toggleSave(job.id)}
-                      aria-label={`${isSaved ? 'Remove from' : 'Add to'} saved jobs: ${job.title} at ${job.company}`}
-                      aria-pressed={isSaved}
-                      style={{ padding: '0 16px' }}
-                    >
-                      <Bookmark size={20} fill={isSaved ? "white" : "none"} aria-hidden="true" />
-                      <span className="sr-only">{isSaved ? 'Saved' : 'Save job'}</span>
-                    </AccessibleButton>
-                    <Link to={`/jobs/${job.id}`} style={{ textDecoration: 'none' }}>
-                      <AccessibleButton aria-label={`View details and apply for ${job.title} at ${job.company}`}>
-                        View & Apply
-                      </AccessibleButton>
-                    </Link>
-                  </div>
-                </div>
-              </motion.article>
-            );
-          })}
-        </motion.div>
-      </main>
+                    {/* Actions */}
+                    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', alignItems: 'flex-end', gap: '12px', flexShrink: 0 }}>
+                      {job.accessibilityScore != null && (
+                        <div style={{ textAlign: 'center' }}>
+                          <div style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--accent-purple)', lineHeight: 1 }}>
+                            {Math.round((job.accessibilityScore / 18) * 100)}%
+                          </div>
+                          <div style={{ fontSize: '0.7rem', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Accessibility</div>
+                        </div>
+                      )}
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button
+                          onClick={() => toggleSave(job.id)}
+                          aria-pressed={isSaved}
+                          style={{
+                            padding: '8px 12px', borderRadius: '10px', border: '1px solid var(--border)',
+                            background: isSaved ? 'var(--accent-purple)' : 'transparent',
+                            color: isSaved ? 'white' : 'var(--text-muted)', cursor: 'pointer',
+                            display: 'flex', alignItems: 'center'
+                          }}
+                        >
+                          <Bookmark size={17} fill={isSaved ? 'white' : 'none'} />
+                        </button>
+                        <Link to={`/jobs/${job.id}`} style={{ textDecoration: 'none' }}>
+                          <AccessibleButton style={{ minHeight: '38px', padding: '0 16px', fontSize: '0.88rem' }}>
+                            View & Apply
+                          </AccessibleButton>
+                        </Link>
+                      </div>
+                    </div>
+                  </motion.article>
+                );
+              })}
+            </div>
+          )}
+        </main>
+      </div>
     </div>
   );
 }
