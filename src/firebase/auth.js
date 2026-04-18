@@ -4,45 +4,244 @@ import {
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
-  updateProfile
+  updateProfile,
+  sendSignInLinkToEmail,
+  isSignInWithEmailLink,
+  signInWithEmailLink,
+  sendEmailVerification,
+  reload
 } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
-import { auth, db } from './config';
+import { ref, set, get, update } from 'firebase/database';
+import { auth, db, rtdb } from './config';
 
-// Register new user (candidate or employer)
+// Send OTP link to email for new user registration
+export const registerUserWithOTP = async (email, userData, userType = 'candidate') => {
+  try {
+    // Store user data temporarily in RTDB for later retrieval after email verification
+    const tempUserRef = ref(rtdb, `pendingUsers/${email.replace(/[.#$[\]]/g, '_')}`);
+    await set(tempUserRef, {
+      ...userData,
+      email,
+      userType,
+      createdAt: new Date().toISOString(),
+      pending: true
+    });
+
+    // Send email link for sign-in
+    const actionCodeSettings = {
+      url: `${window.location.origin}/?authEmail=${encodeURIComponent(email)}&mode=register&type=${userType}`,
+      handleCodeInApp: true
+    };
+
+    await sendSignInLinkToEmail(auth, email, actionCodeSettings);
+
+    // Save email in localStorage for later verification
+    window.localStorage.setItem('emailForSignIn', email);
+
+    return { success: true, message: 'OTP link sent to your email. Please check and click the link to complete registration.' };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+};
+
+// Send OTP link to existing user for login
+export const loginUserWithOTP = async (email) => {
+  try {
+    const actionCodeSettings = {
+      url: `${window.location.origin}/?authEmail=${encodeURIComponent(email)}&mode=login`,
+      handleCodeInApp: true
+    };
+
+    await sendSignInLinkToEmail(auth, email, actionCodeSettings);
+
+    // Save email in localStorage for later verification
+    window.localStorage.setItem('emailForSignIn', email);
+
+    return { success: true, message: 'OTP link sent to your email. Please check and click to sign in.' };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+};
+
+// Complete OTP email link verification
+export const verifyEmailOTP = async (userType = 'candidate') => {
+  try {
+    // Check if the URL has the email link
+    if (isSignInWithEmailLink(auth, window.location.href)) {
+      let email = window.localStorage.getItem('emailForSignIn');
+
+      if (!email) {
+        // User opened link on a different device/browser, ask for email
+        email = prompt('Please provide your email for confirmation');
+      }
+
+      // Sign in with email link
+      const result = await signInWithEmailLink(auth, email, window.location.href);
+      const user = result.user;
+
+      // Check if this is a new user registration
+      const mode = new URLSearchParams(window.location.search).get('mode');
+
+      if (mode === 'register') {
+        // Fetch pending user data and create user profile
+        const sanitizedEmail = email.replace(/[.#$[\]]/g, '_');
+        const pendingUserRef = ref(rtdb, `pendingUsers/${sanitizedEmail}`);
+        const snapshot = await get(pendingUserRef);
+
+        if (snapshot.exists()) {
+          const userData = snapshot.val();
+          const userType = userData.userType || 'candidate';
+
+          // Update display name
+          await updateProfile(user, { displayName: userData.name });
+
+          // Create user document in Firestore
+          const userDocRef = doc(db, userType === 'candidate' ? 'candidates' : 'employers', user.uid);
+          await setDoc(userDocRef, {
+            ...userData,
+            email,
+            userType,
+            verified: true,
+            createdAt: new Date().toISOString(),
+            uid: user.uid,
+            pending: false
+          });
+
+          // Save to Realtime Database
+          const rtdbRef = ref(rtdb, `users/${user.uid}`);
+          await set(rtdbRef, {
+            ...userData,
+            email,
+            userType,
+            verified: true,
+            createdAt: new Date().toISOString(),
+            uid: user.uid,
+            displayName: userData.name,
+            pending: false
+          });
+
+          // Delete pending user record
+          await set(pendingUserRef, null);
+        }
+      }
+
+      // Clear localStorage
+      window.localStorage.removeItem('emailForSignIn');
+
+      return { success: true, user, isNewUser: mode === 'register' };
+    }
+
+    return { success: false, error: 'Invalid email link or already verified' };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+};
+
+// Sign in existing user with email/password
+export const loginUser = async (email, password) => {
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+    // Reload to get fresh emailVerified status
+    await reload(user);
+
+    if (!user.emailVerified) {
+      await signOut(auth);
+      return { 
+        success: false, 
+        error: 'Please verify your email before signing in. Check your inbox for a verification link.',
+        needsVerification: true,
+        email 
+      };
+    }
+
+    return { success: true, user };
+  } catch (error) {
+    let message = error.message;
+    if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+      message = 'Invalid email or password. Please try again.';
+    } else if (error.code === 'auth/too-many-requests') {
+      message = 'Too many failed attempts. Please try again later.';
+    }
+    return { success: false, error: message };
+  }
+};
+
+// Register new user with email verification
 export const registerUser = async (email, password, userData, userType = 'candidate') => {
   try {
-    // Create auth user
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
-    // Update display name
     await updateProfile(user, { displayName: userData.name });
 
-    // Create user document in Firestore
+    // Send verification email
+    await sendEmailVerification(user, {
+      url: `${window.location.origin}/auth?verified=true`,
+      handleCodeInApp: false
+    });
+
+    // Store user data in Firestore (unverified flag)
     const userDocRef = doc(db, userType === 'candidate' ? 'candidates' : 'employers', user.uid);
     await setDoc(userDocRef, {
       ...userData,
       email,
       userType,
       createdAt: new Date().toISOString(),
-      uid: user.uid
+      uid: user.uid,
+      emailVerified: false
     });
 
-    return { success: true, user };
+    const rtdbRef = ref(rtdb, `users/${user.uid}`);
+    await set(rtdbRef, {
+      ...userData,
+      email,
+      userType,
+      createdAt: new Date().toISOString(),
+      uid: user.uid,
+      displayName: userData.name,
+      emailVerified: false
+    });
+
+    // Sign out immediately until they verify their email
+    await signOut(auth);
+
+    return { success: true, user, needsVerification: true };
+  } catch (error) {
+    let message = error.message;
+    if (error.code === 'auth/email-already-in-use') {
+      message = 'An account with this email already exists. Please sign in instead.';
+    } else if (error.code === 'auth/weak-password') {
+      message = 'Password is too weak. Use at least 6 characters.';
+    }
+    return { success: false, error: message };
+  }
+};
+
+// Resend verification email to a signed-in (unverified) user
+export const resendVerificationEmail = async (email, password) => {
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+    await sendEmailVerification(user, {
+      url: `${window.location.origin}/auth?verified=true`,
+      handleCodeInApp: false
+    });
+    await signOut(auth);
+    return { success: true, message: 'Verification email resent! Please check your inbox.' };
   } catch (error) {
     return { success: false, error: error.message };
   }
 };
 
-// Sign in existing user
-export const loginUser = async (email, password) => {
-  try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    return { success: true, user: userCredential.user };
-  } catch (error) {
-    return { success: false, error: error.message };
-  }
+// Check if current user's email is verified (after they click the link)
+export const checkEmailVerified = async () => {
+  const user = auth.currentUser;
+  if (!user) return false;
+  await reload(user);
+  return user.emailVerified;
 };
 
 // Sign out user
@@ -55,7 +254,7 @@ export const logoutUser = async () => {
   }
 };
 
-// Get current user profile data
+// Get current user profile data from Firestore
 export const getCurrentUserProfile = async (userType = 'candidate') => {
   const user = auth.currentUser;
   if (!user) return null;
@@ -71,6 +270,51 @@ export const getCurrentUserProfile = async (userType = 'candidate') => {
   } catch (error) {
     console.error('Error fetching profile:', error);
     return null;
+  }
+};
+
+// Get current user profile data from Realtime Database
+export const getCurrentUserProfileRTDB = async () => {
+  const user = auth.currentUser;
+  if (!user) return null;
+
+  try {
+    const userRef = ref(rtdb, `users/${user.uid}`);
+    const snapshot = await get(userRef);
+    
+    if (snapshot.exists()) {
+      return { ...snapshot.val(), id: snapshot.key };
+    }
+    return null;
+  } catch (error) {
+    console.error('Error fetching RTDB profile:', error);
+    return null;
+  }
+};
+
+// Update user data in both Firestore and Realtime Database
+export const updateUserProfile = async (userData, userType = 'candidate') => {
+  const user = auth.currentUser;
+  if (!user) return { success: false, error: 'No user logged in' };
+
+  try {
+    // Update in Firestore
+    const userDocRef = doc(db, userType === 'candidate' ? 'candidates' : 'employers', user.uid);
+    await setDoc(userDocRef, {
+      ...userData,
+      updatedAt: new Date().toISOString()
+    }, { merge: true });
+
+    // Update in Realtime Database
+    const rtdbRef = ref(rtdb, `users/${user.uid}`);
+    await update(rtdbRef, {
+      ...userData,
+      updatedAt: new Date().toISOString()
+    });
+
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error.message };
   }
 };
 

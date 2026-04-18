@@ -20,25 +20,27 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const unsubscribe = onAuthChange(async (firebaseUser) => {
-      setUser(firebaseUser);
-      
-      if (firebaseUser) {
+      // Only treat the user as authenticated if their email is verified
+      if (firebaseUser && firebaseUser.emailVerified) {
+        setUser(firebaseUser);
+
         // Try to fetch profile (check both candidate and employer)
         let profile = await getCurrentUserProfile('candidate');
         let type = 'candidate';
-        
+
         if (!profile) {
           profile = await getCurrentUserProfile('employer');
           type = 'employer';
         }
-        
+
         setUserProfile(profile);
         setUserType(profile ? type : null);
       } else {
+        setUser(null);
         setUserProfile(null);
         setUserType(null);
       }
-      
+
       setLoading(false);
     });
 

@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, ChevronRight, Upload, X } from 'lucide-react';
 import { AccessibleButton } from '../App';
+import { useAuth } from '../context/AuthContext';
+import { saveCandidateProfile } from '../firebase/candidates';
 import confetti from 'canvas-confetti';
 
 const STEPS = [
@@ -13,10 +15,14 @@ const STEPS = [
 ];
 
 export default function ProfileBuilder() {
+  const navigate = useNavigate();
+  const { user, isAuthenticated, refreshProfile } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
 
-  const [skills, setSkills] = useState(['React', 'WCAG']);
+  const [skills, setSkills] = useState([]);
   const [skillInput, setSkillInput] = useState('');
 
   const handleNext = () => {
@@ -28,7 +34,49 @@ export default function ProfileBuilder() {
     if (currentStep > 1) setCurrentStep(s => s - 1);
   };
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
+    setSaving(true);
+    setSaveError('');
+
+    // Collect all form data from the DOM
+    const form = document.querySelector('form');
+    const formData = form ? new FormData(form) : new FormData();
+
+    const profileData = {
+      name: document.getElementById('fullName')?.value || user?.displayName || '',
+      email: document.getElementById('email')?.value || user?.email || '',
+      phone: document.getElementById('phone')?.value || '',
+      state: document.getElementById('state')?.value || '',
+      city: document.getElementById('city')?.value || '',
+      disabilityType: formData.getAll('disabilityType'),
+      assistiveTech: formData.getAll('assistiveTech'),
+      accommodations: formData.getAll('accommodations'),
+      primaryComm: formData.get('primaryComm') || '',
+      interviewPrefs: formData.getAll('interviewPrefs'),
+      contactPrefs: formData.getAll('contactPrefs'),
+      skills,
+      experienceLevel: formData.get('expLevel') || '',
+      industries: formData.getAll('industries'),
+      workPreference: formData.get('workMode') || '',
+      salaryMin: document.getElementById('salaryMin')?.value || '',
+      salaryMax: document.getElementById('salaryMax')?.value || '',
+      availableFrom: document.getElementById('availableFrom')?.value || '',
+      openToRelocation: document.getElementById('openReloc')?.checked || false,
+      createdAt: new Date().toISOString()
+    };
+
+    if (isAuthenticated && user) {
+      const result = await saveCandidateProfile(user.uid, profileData);
+      if (!result.success) {
+        setSaveError(result.error || 'Failed to save profile.');
+        setSaving(false);
+        return;
+      }
+      // Refresh context so the profile data is available across the app
+      await refreshProfile();
+    }
+
+    setSaving(false);
     setIsCompleted(true);
     confetti({
       particleCount: 150,
@@ -84,16 +132,27 @@ export default function ProfileBuilder() {
         </motion.div>
         <h1 style={{ fontSize: '3rem', marginBottom: '16px' }}>Your profile is live!</h1>
         <p style={{ color: 'var(--text-muted)', fontSize: '1.25rem', marginBottom: '40px', lineHeight: '1.6' }}>
-          We've found <strong style={{ color: 'var(--accent-purple)' }}>47 accessible roles</strong> that perfectly match your skills and accommodations.
+          {isAuthenticated
+            ? <>Your profile has been saved! Employers can now find and match with you.</>
+            : <>Create an account to save your profile and let employers find you.</>}
         </p>
-        <Link to="/jobs" style={{ textDecoration: 'none' }}>
-          <AccessibleButton 
-            style={{ minHeight: '60px', fontSize: '1.25rem', padding: '0 40px', borderRadius: '16px' }}
-            aria-label="Browse 47 matching accessible job listings"
-          >
-            Browse Matching Jobs <ChevronRight size={24} aria-hidden="true" />
-          </AccessibleButton>
-        </Link>
+        <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <Link to="/profile" style={{ textDecoration: 'none' }}>
+            <AccessibleButton 
+              style={{ minHeight: '60px', fontSize: '1.15rem', padding: '0 36px', borderRadius: '16px' }}
+            >
+              View My Profile
+            </AccessibleButton>
+          </Link>
+          <Link to="/jobs" style={{ textDecoration: 'none' }}>
+            <AccessibleButton 
+              variant="outline"
+              style={{ minHeight: '60px', fontSize: '1.15rem', padding: '0 36px', borderRadius: '16px' }}
+            >
+              Browse Jobs <ChevronRight size={20} />
+            </AccessibleButton>
+          </Link>
+        </div>
       </motion.div>
     );
   }
@@ -458,9 +517,12 @@ export default function ProfileBuilder() {
             >
               Back
             </AccessibleButton>
-            <AccessibleButton type="button" onClick={handleNext}>
-              {currentStep === 4 ? 'Complete Profile' : 'Next Step'} <ChevronRight size={20} strokeWidth={3} />
+            <AccessibleButton type="button" onClick={handleNext} disabled={saving} style={{ opacity: saving ? 0.7 : 1 }}>
+              {saving ? 'Saving…' : currentStep === 4 ? 'Complete Profile' : 'Next Step'} <ChevronRight size={20} strokeWidth={3} />
             </AccessibleButton>
+            {saveError && (
+              <div style={{ color: '#ef4444', fontSize: '0.9rem', marginTop: '12px', textAlign: 'center' }}>{saveError}</div>
+            )}
           </div>
         </form>
       </div>
