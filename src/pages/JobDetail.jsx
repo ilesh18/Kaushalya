@@ -43,7 +43,8 @@ export default function JobDetail() {
     setApplying(true);
     const result = await applyToJob(id, user.uid, {
       name: userProfile?.name || user?.displayName || 'Applicant',
-      skills: userProfile?.skills || []
+      skills: userProfile?.skills || [],
+      isPremium: userProfile?.isPremium || false
     });
     if (result.success) {
       setApplied(true);

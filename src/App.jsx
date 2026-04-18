@@ -1,6 +1,10 @@
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from 'react';
 import { BrowserRouter, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
+<<<<<<< HEAD
+import { Menu, X, MessageCircle, LogOut, Crown } from 'lucide-react';
+=======
 import { Menu, X, MessageCircle, LogOut } from 'lucide-react';
+>>>>>>> 22deeafb28dd9030699a9557f39440f6a066382a
 import { motion, AnimatePresence } from 'framer-motion';
 import LandingHero from './pages/LandingHero';
 import ProfileBuilder from './pages/ProfileBuilder';
@@ -18,6 +22,10 @@ import AboutUs from './pages/AboutUs';
 import ResumeBuilder from './pages/ResumeBuilder';
 import LibraryPage from './pages/LibraryPage';
 import UserProfile from './pages/UserProfile';
+<<<<<<< HEAD
+import PricingPage from './pages/PricingPage';
+=======
+>>>>>>> 22deeafb28dd9030699a9557f39440f6a066382a
 import { useAuth } from './context/AuthContext';
 import faviconImg from './public/favicon.png';
 import './App.css';
@@ -219,6 +227,12 @@ const Header = () => {
           </button>
           <span className="tooltip-text">Chat with Asha</span>
         </div>
+<<<<<<< HEAD
+        <AccessibleButton variant="ghost" className="desktop-only" onClick={() => navigate('/pricing')} aria-label="Premium Membership" style={{ color: '#FFD700', gap: '4px' }}>
+          <Crown size={16} /> Premium
+        </AccessibleButton>
+=======
+>>>>>>> 22deeafb28dd9030699a9557f39440f6a066382a
         <AccessibleButton variant="outline" className="desktop-only" onClick={() => navigate('/interview-prep')} aria-label="Practice Interviews">Interview Prep</AccessibleButton>
         <AccessibleButton variant="outline" className="desktop-only" onClick={() => navigate('/resume-builder')} aria-label="AI Resume Builder">AI Resume</AccessibleButton>
         <AccessibleButton variant="outline" className="desktop-only" onClick={() => navigate('/library')} aria-label="AI Library">Library</AccessibleButton>
@@ -388,6 +402,25 @@ const Header = () => {
             </Link>
             <Link
               onClick={closeMobileMenu}
+<<<<<<< HEAD
+              to="/pricing"
+              style={{
+                fontSize: '1.2rem',
+                padding: '16px 20px',
+                borderRadius: '12px',
+                background: 'var(--bg-secondary)',
+                minHeight: '56px',
+                display: 'flex',
+                alignItems: 'center',
+                color: '#FFD700'
+              }}
+            >
+              Premium Membership
+            </Link>
+            <Link
+              onClick={closeMobileMenu}
+=======
+>>>>>>> 22deeafb28dd9030699a9557f39440f6a066382a
               to="/interview-prep"
               style={{
                 fontSize: '1.2rem',
@@ -710,6 +743,14 @@ const AnimatedRoutes = () => {
             <UserProfile />
           </motion.div>
         } />
+<<<<<<< HEAD
+        <Route path="/pricing" element={
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.3 }}>
+            <PricingPage />
+          </motion.div>
+        } />
+=======
+>>>>>>> 22deeafb28dd9030699a9557f39440f6a066382a
       </Routes>
     </AnimatePresence>
   );
