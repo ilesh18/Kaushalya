@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Briefcase, Trash2, PlusCircle, CheckCircle } from 'lucide-react';
+import { Briefcase, Trash2, PlusCircle, CheckCircle, Users, Crown } from 'lucide-react';
 import { AccessibleButton } from '../App';
 import { useAuth } from '../context/AuthContext';
 import { createJob, getJobsByEmployer, deleteJob } from '../firebase/jobs';
@@ -19,6 +19,8 @@ export default function EmployerDashboard() {
     title: '', company: '', location: '', workMode: '',
     salaryMin: '', salaryMax: '', skillsRequired: '', description: ''
   });
+
+  const [expandedJobId, setExpandedJobId] = useState(null);
 
   const [checks, setChecks] = useState({
     p1:false,p2:false,p3:false,p4:false,
@@ -178,11 +180,52 @@ export default function EmployerDashboard() {
                     </div>
                   </div>
                   <div style={{ display:'flex', gap:'8px' }}>
+                    <AccessibleButton variant="ghost" onClick={() => setExpandedJobId(expandedJobId === job.id ? null : job.id)} style={{ minHeight:'36px', padding:'0 14px', fontSize:'0.85rem', color: 'var(--accent-purple)' }}>
+                      <Users size={16} /> Applicants
+                    </AccessibleButton>
                     <AccessibleButton variant="outline" onClick={() => navigate(`/jobs/${job.id}`)} style={{ minHeight:'36px', padding:'0 14px', fontSize:'0.85rem' }}>View</AccessibleButton>
                     <button onClick={() => handleDelete(job.id)} style={{ padding:'8px 12px', borderRadius:'10px', border:'1px solid rgba(239,68,68,0.3)', background:'rgba(239,68,68,0.08)', color:'#ef4444', cursor:'pointer', display:'flex', alignItems:'center', gap:'4px', fontSize:'0.82rem' }}>
                       <Trash2 size={13} /> Delete
                     </button>
                   </div>
+                  
+                  <AnimatePresence>
+                    {expandedJobId === job.id && (
+                      <motion.div 
+                        initial={{ opacity: 0, height: 0 }} 
+                        animate={{ opacity: 1, height: 'auto' }} 
+                        exit={{ opacity: 0, height: 0 }}
+                        style={{ width: '100%', marginTop: '16px', overflow: 'hidden' }}
+                      >
+                        <div style={{ background: 'var(--bg-primary)', padding: '20px', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                          <h4 style={{ marginBottom: '16px', fontSize: '1.1rem' }}>Applicants ({job.applicants?.length || 0})</h4>
+                          {!job.applicants || job.applicants.length === 0 ? (
+                            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>No one has applied to this job yet.</p>
+                          ) : (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                              {job.applicants.sort((a,b) => (b.isPremium === a.isPremium ? 0 : b.isPremium ? 1 : -1)).map((applicant, i) => (
+                                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: 'var(--bg-secondary)', borderRadius: '8px', border: applicant.isPremium ? '1px solid #FFD700' : '1px solid var(--border)' }}>
+                                  <div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                                      <strong>{applicant.name}</strong>
+                                      {applicant.isPremium && <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.7rem', background: 'rgba(255,215,0,0.1)', color: '#FFD700', padding: '2px 6px', borderRadius: '12px' }}><Crown size={10} /> Premium Candidate</span>}
+                                    </div>
+                                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                                      {applicant.email && <span>{applicant.email} • </span>}
+                                      {applicant.skills && applicant.skills.length > 0 && <span>Skills: {applicant.skills.slice(0,3).join(', ')}{applicant.skills.length > 3 ? '...' : ''}</span>}
+                                    </div>
+                                  </div>
+                                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                                    Applied: {new Date(applicant.appliedAt).toLocaleDateString()}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </motion.div>
               ))}
             </div>

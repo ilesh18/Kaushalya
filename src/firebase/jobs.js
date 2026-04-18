@@ -1,24 +1,23 @@
-// Job-related Firestore operations
+// Job-related Realtime Database operations
 import {
-  collection,
-  doc,
-  addDoc,
-  getDoc,
-  getDocs,
-  updateDoc,
-  deleteDoc,
-  query,
-  where,
+  ref,
+  push,
+  get,
+  set,
+  update,
+  remove,
   serverTimestamp
-} from 'firebase/firestore';
-import { db } from './config';
+} from 'firebase/database';
+import { rtdb } from './config';
 
 const COLLECTION = 'jobs';
 
 // Create new job posting
 export const createJob = async (jobData, employerId) => {
   try {
-    const docRef = await addDoc(collection(db, COLLECTION), {
+    const jobsRef = ref(rtdb, COLLECTION);
+    const newJobRef = push(jobsRef);
+    await set(newJobRef, {
       ...jobData,
       employerId,
       status: 'active',
@@ -26,27 +25,30 @@ export const createJob = async (jobData, employerId) => {
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     });
-    return { success: true, id: docRef.id };
+    return { success: true, id: newJobRef.key };
   } catch (error) {
     return { success: false, error: error.message };
   }
 };
 
-// Get all active jobs — simple query, no composite index required
+// Get all active jobs
 export const getAllJobs = async () => {
   try {
-    const snap = await getDocs(collection(db, COLLECTION));
+    const jobsRef = ref(rtdb, COLLECTION);
+    const snapshot = await get(jobsRef);
     const jobs = [];
-    snap.forEach((d) => {
-      const data = d.data();
-      if (data.status === 'active') {
-        jobs.push({ ...data, id: d.id });
-      }
-    });
+    if (snapshot.exists()) {
+      snapshot.forEach((childSnapshot) => {
+        const data = childSnapshot.val();
+        if (data.status === 'active') {
+          jobs.push({ ...data, id: childSnapshot.key });
+        }
+      });
+    }
     // Sort by createdAt descending client-side
     jobs.sort((a, b) => {
-      const ta = a.createdAt?.toMillis?.() ?? new Date(a.createdAt || 0).getTime();
-      const tb = b.createdAt?.toMillis?.() ?? new Date(b.createdAt || 0).getTime();
+      const ta = typeof a.createdAt === 'number' ? a.createdAt : new Date(a.createdAt || 0).getTime();
+      const tb = typeof b.createdAt === 'number' ? b.createdAt : new Date(b.createdAt || 0).getTime();
       return tb - ta;
     });
     return { success: true, data: jobs };
@@ -58,10 +60,10 @@ export const getAllJobs = async () => {
 // Get job by ID
 export const getJobById = async (jobId) => {
   try {
-    const docRef = doc(db, COLLECTION, jobId);
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-      return { success: true, data: { ...docSnap.data(), id: docSnap.id } };
+    const jobRef = ref(rtdb, `${COLLECTION}/${jobId}`);
+    const snapshot = await get(jobRef);
+    if (snapshot.exists()) {
+      return { success: true, data: { ...snapshot.val(), id: snapshot.key } };
     }
     return { success: false, error: 'Job not found' };
   } catch (error) {
@@ -69,20 +71,23 @@ export const getJobById = async (jobId) => {
   }
 };
 
-// Get jobs by employer ID — no composite index needed
+// Get jobs by employer ID
 export const getJobsByEmployer = async (employerId) => {
   try {
-    const snap = await getDocs(collection(db, COLLECTION));
+    const jobsRef = ref(rtdb, COLLECTION);
+    const snapshot = await get(jobsRef);
     const jobs = [];
-    snap.forEach((d) => {
-      const data = d.data();
-      if (data.employerId === employerId) {
-        jobs.push({ ...data, id: d.id });
-      }
-    });
+    if (snapshot.exists()) {
+      snapshot.forEach((childSnapshot) => {
+        const data = childSnapshot.val();
+        if (data.employerId === employerId) {
+          jobs.push({ ...data, id: childSnapshot.key });
+        }
+      });
+    }
     jobs.sort((a, b) => {
-      const ta = a.createdAt?.toMillis?.() ?? new Date(a.createdAt || 0).getTime();
-      const tb = b.createdAt?.toMillis?.() ?? new Date(b.createdAt || 0).getTime();
+      const ta = typeof a.createdAt === 'number' ? a.createdAt : new Date(a.createdAt || 0).getTime();
+      const tb = typeof b.createdAt === 'number' ? b.createdAt : new Date(b.createdAt || 0).getTime();
       return tb - ta;
     });
     return { success: true, data: jobs };
@@ -94,11 +99,11 @@ export const getJobsByEmployer = async (employerId) => {
 // Apply to job
 export const applyToJob = async (jobId, candidateId, candidateData) => {
   try {
-    const jobRef = doc(db, COLLECTION, jobId);
-    const jobSnap = await getDoc(jobRef);
-    if (!jobSnap.exists()) return { success: false, error: 'Job not found' };
+    const jobRef = ref(rtdb, `${COLLECTION}/${jobId}`);
+    const snapshot = await get(jobRef);
+    if (!snapshot.exists()) return { success: false, error: 'Job not found' };
 
-    const jobData = jobSnap.data();
+    const jobData = snapshot.val();
     const applicants = jobData.applicants || [];
 
     if (applicants.some((a) => a.candidateId === candidateId)) {
@@ -108,12 +113,13 @@ export const applyToJob = async (jobId, candidateId, candidateData) => {
     applicants.push({
       candidateId,
       candidateName: candidateData.name,
-      candidateSkills: candidateData.skills,
+      candidateSkills: candidateData.skills || [],
       appliedAt: new Date().toISOString(),
-      status: 'pending'
+      status: 'pending',
+      isPremium: candidateData.isPremium || false
     });
 
-    await updateDoc(jobRef, { applicants });
+    await update(jobRef, { applicants });
     return { success: true };
   } catch (error) {
     return { success: false, error: error.message };
@@ -123,7 +129,8 @@ export const applyToJob = async (jobId, candidateId, candidateData) => {
 // Update job
 export const updateJob = async (jobId, updateData) => {
   try {
-    await updateDoc(doc(db, COLLECTION, jobId), {
+    const jobRef = ref(rtdb, `${COLLECTION}/${jobId}`);
+    await update(jobRef, {
       ...updateData,
       updatedAt: serverTimestamp()
     });
@@ -136,7 +143,8 @@ export const updateJob = async (jobId, updateData) => {
 // Delete job
 export const deleteJob = async (jobId) => {
   try {
-    await deleteDoc(doc(db, COLLECTION, jobId));
+    const jobRef = ref(rtdb, `${COLLECTION}/${jobId}`);
+    await remove(jobRef);
     return { success: true };
   } catch (error) {
     return { success: false, error: error.message };

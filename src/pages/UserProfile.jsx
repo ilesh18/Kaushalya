@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { User, Mail, Phone, MapPin, Briefcase, Edit3, LogOut, Star, Shield, Settings, ChevronRight, BookOpen, Clock, CheckCircle, Loader2 } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Briefcase, Edit3, LogOut, Star, Shield, Settings, ChevronRight, BookOpen, Clock, CheckCircle, Loader2, Crown } from 'lucide-react';
 import { AccessibleButton } from '../App';
 import { useAuth } from '../context/AuthContext';
 import { getCandidateProfile } from '../firebase/candidates';
@@ -82,6 +82,11 @@ export default function UserProfile() {
               {(city||state) && <span style={{ display:'flex', alignItems:'center', gap:'5px' }}><MapPin size={13}/>{[city,state].filter(Boolean).join(', ')}</span>}
             </div>
             <div style={{ display:'flex', gap:'8px', flexWrap:'wrap' }}>
+              {profile?.isPremium && (
+                <span style={{ padding:'4px 12px', borderRadius:'20px', fontSize:'0.78rem', fontWeight:'600', background:'rgba(255,215,0,0.15)', color:'#FFD700', display:'flex', alignItems:'center', gap:'4px' }}>
+                  <Crown size={12}/> Premium Member
+                </span>
+              )}
               <span style={{ padding:'4px 12px', borderRadius:'20px', fontSize:'0.78rem', fontWeight:'600', background:'rgba(5,150,105,0.1)', color:'var(--success)', display:'flex', alignItems:'center', gap:'4px' }}>
                 <CheckCircle size={12}/> Email Verified
               </span>
