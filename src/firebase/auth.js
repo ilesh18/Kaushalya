@@ -15,6 +15,33 @@ import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { ref, set, get, update } from 'firebase/database';
 import { auth, db, rtdb } from './config';
 
+const trimTrailingSlash = (value = '') => value.replace(/\/+$/, '');
+
+const getAuthContinueBaseUrl = () => {
+  const envBaseUrl = trimTrailingSlash(import.meta.env.VITE_AUTH_CONTINUE_URL || '');
+  if (envBaseUrl) return envBaseUrl;
+
+  // Firebase may reject 127.0.0.1 unless that exact host is allowlisted.
+  const origin = window.location.origin;
+  if (origin.includes('127.0.0.1')) {
+    return origin.replace('127.0.0.1', 'localhost');
+  }
+
+  return trimTrailingSlash(origin);
+};
+
+const buildAuthContinueUrl = (pathWithQuery = '') => {
+  const normalizedPath = pathWithQuery.startsWith('/') ? pathWithQuery : `/${pathWithQuery}`;
+  return `${getAuthContinueBaseUrl()}${normalizedPath}`;
+};
+
+const mapAuthEmailLinkError = (error) => {
+  if (error?.code === 'auth/unauthorized-continue-uri') {
+    return 'Email link could not be sent because the redirect domain is not authorized in Firebase. Add your app domain (for example localhost, 127.0.0.1, or your deployed domain) in Firebase Console > Authentication > Settings > Authorized domains.';
+  }
+  return error?.message || 'Unable to send email link right now.';
+};
+
 // Send OTP link to email for new user registration
 export const registerUserWithOTP = async (email, userData, userType = 'candidate') => {
   try {
@@ -30,7 +57,7 @@ export const registerUserWithOTP = async (email, userData, userType = 'candidate
 
     // Send email link for sign-in
     const actionCodeSettings = {
-      url: `${window.location.origin}/?authEmail=${encodeURIComponent(email)}&mode=register&type=${userType}`,
+      url: buildAuthContinueUrl(`/?authEmail=${encodeURIComponent(email)}&mode=register&type=${userType}`),
       handleCodeInApp: true
     };
 
@@ -41,7 +68,7 @@ export const registerUserWithOTP = async (email, userData, userType = 'candidate
 
     return { success: true, message: 'OTP link sent to your email. Please check and click the link to complete registration.' };
   } catch (error) {
-    return { success: false, error: error.message };
+    return { success: false, error: mapAuthEmailLinkError(error) };
   }
 };
 
@@ -49,7 +76,7 @@ export const registerUserWithOTP = async (email, userData, userType = 'candidate
 export const loginUserWithOTP = async (email) => {
   try {
     const actionCodeSettings = {
-      url: `${window.location.origin}/?authEmail=${encodeURIComponent(email)}&mode=login`,
+      url: buildAuthContinueUrl(`/?authEmail=${encodeURIComponent(email)}&mode=login`),
       handleCodeInApp: true
     };
 
@@ -60,7 +87,7 @@ export const loginUserWithOTP = async (email) => {
 
     return { success: true, message: 'OTP link sent to your email. Please check and click to sign in.' };
   } catch (error) {
-    return { success: false, error: error.message };
+    return { success: false, error: mapAuthEmailLinkError(error) };
   }
 };
 
@@ -179,7 +206,7 @@ export const registerUser = async (email, password, userData, userType = 'candid
 
     // Send verification email
     await sendEmailVerification(user, {
-      url: `${window.location.origin}/auth?verified=true`,
+      url: buildAuthContinueUrl('/auth?verified=true'),
       handleCodeInApp: false
     });
 
@@ -215,6 +242,8 @@ export const registerUser = async (email, password, userData, userType = 'candid
       message = 'An account with this email already exists. Please sign in instead.';
     } else if (error.code === 'auth/weak-password') {
       message = 'Password is too weak. Use at least 6 characters.';
+    } else if (error.code === 'auth/unauthorized-continue-uri') {
+      message = mapAuthEmailLinkError(error);
     }
     return { success: false, error: message };
   }
@@ -226,13 +255,13 @@ export const resendVerificationEmail = async (email, password) => {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
     await sendEmailVerification(user, {
-      url: `${window.location.origin}/auth?verified=true`,
+      url: buildAuthContinueUrl('/auth?verified=true'),
       handleCodeInApp: false
     });
     await signOut(auth);
     return { success: true, message: 'Verification email resent! Please check your inbox.' };
   } catch (error) {
-    return { success: false, error: error.message };
+    return { success: false, error: mapAuthEmailLinkError(error) };
   }
 };
 

@@ -217,10 +217,16 @@ VITE_FIREBASE_PROJECT_ID=your_project_id
 VITE_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
 VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
 VITE_FIREBASE_APP_ID=your_app_id
+VITE_AUTH_CONTINUE_URL=http://localhost:5173
 
 # Gemini AI (Optional - enables AI chatbot)
 VITE_GEMINI_API_KEY=your_gemini_api_key
 ```
+
+For Firebase email links (OTP and verification), make sure the redirect host is allowlisted:
+
+- Firebase Console -> Authentication -> Settings -> Authorized domains
+- Add domains you use for development and production (for example `localhost`, `127.0.0.1`, and your deployed domain)
 
 ### Build for Production
 
